@@ -1,9 +1,18 @@
--- ================ CLASE ===============
+-- ============== CLASE ===============
 local Animation = {}
 Animation.__index = Animation
 
 -- =============== INICIALIZACION ==================
-function Animation:new(img, frames_count, width, height, speed, is_vertical)
+
+--- Genera una nueva animacion a partir de los parametros 
+--- @param img string ruta al spritesheet
+--- @param index number columna/fila donde comineza la animacion
+---@param frames_count number cantidad de frames
+---@param width number ancho de cada sprite
+---@param height number alto de cada sprite
+---@param speed number velocidad a la que se reproduce la animacion
+---@param is_vertical boolean sentido de avance de las animaciones en el spritesheet
+function Animation:new(img, index, frames_count, width, height, speed, is_vertical)
 
     local animation = setmetatable({}, Animation)
 
@@ -21,14 +30,14 @@ function Animation:new(img, frames_count, width, height, speed, is_vertical)
         -- (frames_count - 1) por claridad al calcular la cantidad de frames a cargar
         for i = 0, frames_count - 1, 1 do
            table.insert(animation.quads,
-        love.graphics.newQuad(0, animation.height * i, animation.width, animation.height, 
+        love.graphics.newQuad(animation.width * index, animation.height * i, animation.width, animation.height, 
         animation.spritesheet)
         ) 
         end
     else
         for i = 0, frames_count -1, 1 do
           table.insert(animation.quads,
-        love.graphics.newQuad(animation.width * i, 0, animation.width, animation.height,
+        love.graphics.newQuad(animation.width * i, animation.height * index, animation.width, animation.height,
         animation.spritesheet)
         )  
         end
@@ -37,7 +46,7 @@ function Animation:new(img, frames_count, width, height, speed, is_vertical)
     return animation
 end
 
--- ================ UPDATE ======================
+-- ============== ACTUALIZACION =================
 
 function Animation:update(dt)
 
