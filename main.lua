@@ -1,5 +1,6 @@
 local Player = require("classes.player")
 local Owner = require("classes.owner")
+local ThrowableObject = require("classes.throwableobject")
 
 -- ======= RESOLUCION =======
 SCREEN_WIDTH = 400 -- Para ancho 800
@@ -16,6 +17,7 @@ function love.load ()
     canvas = love.graphics.newCanvas(SCREEN_WIDTH, SCREEN_HEIGHT)
     player = Player:new(160, 90)
     owner = Owner:new(100, 120)
+    throwable_object = ThrowableObject:new(50, 70)
 end
 
 function love.update (dt)
@@ -28,6 +30,7 @@ function love.draw ()
     love.graphics.clear()
     player:draw()
     owner:draw()
+    throwable_object:draw()
     love.graphics.setCanvas()
     love.graphics.draw(canvas, 0, 0, 0, SCALE, SCALE)
 end
