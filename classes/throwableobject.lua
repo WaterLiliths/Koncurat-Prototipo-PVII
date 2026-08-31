@@ -10,6 +10,8 @@ function ThrowableObject:new(pos_x, pos_y)
 
     throwable_object.x = pos_x
     throwable_object.y = pos_y
+    throwable_object.width = 30
+    throwable_object.height = 30
 
     throwable_object.is_down = false
 

@@ -30,8 +30,11 @@ function Player:new(pos_x, pos_y)
 
     player.x = pos_x
     player.y = pos_y
-
+    player.width = 32 -- alto del sprite
+    player.height = 32 -- alto del sprite
     player.speed = 100
+
+    player.interaction_requested = false
 
     player:load_animations()
     
@@ -42,11 +45,20 @@ end
 
 -- ============== FUNCIONES =================
 
-function Player:throw_objetc()
+function Player:interact()
+
+    self.interaction_requested = true
     
 end
 
+function Player:keypressed(key)
+    if key == "e" then
+        self:interact()
+    end
+end
+
 -- ============== ACTUALIZACION ==============
+
 function Player:update(dt) --Se va a refactorizar luego con Maquinas de Estado/otras funciones
 
     local moving = false

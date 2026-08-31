@@ -16,6 +16,8 @@ function Owner:new(pos_x, pos_y)
     owner.y = pos_y
     owner. speed = 50
     owner.radius = 10
+    owner.width = 30
+    owner.height = 30
 
     owner.annoyment = 0 --Barra de hartazgo
     owner.tenderness = 0 --Barra de ternura
