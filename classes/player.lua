@@ -40,6 +40,12 @@ function Player:new(pos_x, pos_y)
     return player
 end
 
+-- ============== FUNCIONES =================
+
+function Player:throw_objetc()
+    
+end
+
 -- ============== ACTUALIZACION ==============
 function Player:update(dt) --Se va a refactorizar luego con Maquinas de Estado/otras funciones
 
