@@ -29,4 +29,5 @@ function love.draw ()
     game:draw()
     love.graphics.setCanvas()
     love.graphics.draw(canvas, 0, 0, 0, SCALE, SCALE)
+    game:draw_ui()
 end

@@ -31,12 +31,29 @@ end
 --- @param amount number valor para subir en hartazgo
 function Owner:change_annoyment(amount)
     self.annoyment = self.annoyment + amount
+
+    if self.annoyment <= 0 then
+        self.annoyment = 0
+    end
+
+    if self.annoyment >= 100 then
+        self.annoyment = 100
+    end
 end
 
 --- cambia la barra de ternura
 --- @param amount number valor a subir en ternura
 function Owner:change_tenderness(amount)
     self.tenderness = self.tenderness + amount
+
+    if self.tenderness <= 0 then
+        self.tenderness = 0
+    end
+
+    if self.tenderness >= 100 then
+        self.tenderness = 100
+    end
+
 end
 
 -- ============= ACTUALIZACION ============
