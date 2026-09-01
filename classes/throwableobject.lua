@@ -13,7 +13,7 @@ function ThrowableObject:new(pos_x, pos_y)
     throwable_object.width = 30
     throwable_object.height = 30
 
-    throwable_object.is_down = false
+    throwable_object.is_destroyed = false
 
     return throwable_object
 end
@@ -21,15 +21,13 @@ end
 -- ============ LOGICA ==============
 
 function ThrowableObject:throw()
-    self.is_down = true
+    self.is_destroyed = true
 end
 
 -- ============ DIBUJADO ==============
 
 function ThrowableObject:draw()
-    if not self.is_down then
-        love.graphics.rectangle("fill", self.x -5, self.y -5, 10, 10)
-    end
+    love.graphics.rectangle("fill", self.x -5, self.y -5, 10, 10)
 end
 
 return ThrowableObject

@@ -15,8 +15,19 @@ function Game:new()
 
     game.player = Player:new(160, 90)
     game.owner = Owner:new(100, 120)
-    game.throwable_object = ThrowableObject:new(50, 70)
-    
+
+    game.throwable_objects = {}
+
+    table.insert(game.throwable_objects, ThrowableObject:new(50, 70))
+    table.insert(game.throwable_objects, ThrowableObject:new(200, 50))
+    table.insert(game.throwable_objects, ThrowableObject:new(250, 120))
+    table.insert(game.throwable_objects, ThrowableObject:new(300, 250))
+    table.insert(game.throwable_objects, ThrowableObject:new(350, 100))
+    table.insert(game.throwable_objects, ThrowableObject:new(20, 220))
+    table.insert(game.throwable_objects, ThrowableObject:new(150, 280))
+    table.insert(game.throwable_objects, ThrowableObject:new(50, 100))
+
+
     game.annoyment_min = 40
     game.tenderness_min = 60
 
@@ -46,12 +57,13 @@ function Game:interact()
         return
     end
 
-    if self:check_collision(self.player, self.throwable_object) then
-
-        self.throwable_object:throw()
-        self.owner:change_annoyment(15)
-        self.owner:change_tenderness(-10)
-        
+    for _, object in ipairs(self.throwable_objects) do
+        if self:check_collision(self.player, object) then
+            object:throw()
+            self.owner:change_annoyment(15)
+            self.owner:change_tenderness(-10)
+            break
+        end
     end
 
     if self:check_collision(self.player, self.owner) then
@@ -65,7 +77,22 @@ function Game:interact()
 
 end
 
+function Game:remove_destroyed_objects()
+    for i = #self.throwable_objects, 1, -1 do
+        if self.throwable_objects[i].is_destroyed then
+            table.remove(self.throwable_objects, i)
+        end
+    end
+end
+
 function Game:keypressed(key)
+
+    if self.is_won or self.is_game_over then
+        if key == "r" then
+            self:restart()
+        end
+    end
+
     self.player:keypressed(key)
 end
 
@@ -116,6 +143,7 @@ function Game:update (dt)
     self.owner:update(dt)
 
     self:interact()
+    self:remove_destroyed_objects()
 
     self:win_game()
     self:lose_game()
@@ -123,46 +151,112 @@ function Game:update (dt)
 
 end
 
+function Game:restart()
+
+    self.player = Player:new(160, 90)
+    self.owner = Owner:new(100, 120)
+
+    self.throwable_objects = {}
+
+    table.insert(self.throwable_objects, ThrowableObject:new(50, 70))
+    table.insert(self.throwable_objects, ThrowableObject:new(200, 50))
+    table.insert(self.throwable_objects, ThrowableObject:new(250, 120))
+    table.insert(self.throwable_objects, ThrowableObject:new(300, 250))
+    table.insert(self.throwable_objects, ThrowableObject:new(350, 100))
+    table.insert(self.throwable_objects, ThrowableObject:new(20, 220))
+    table.insert(self.throwable_objects, ThrowableObject:new(150, 280))
+    table.insert(self.throwable_objects, ThrowableObject:new(50, 100))
+
+
+    self.is_playing = true
+    self.is_won = false
+    self.is_game_over = false
+
+end
+
 -- ============ DIBUJADO ============
 
 function Game:draw ()
-    self.player:draw()
-    self.owner:draw()
-    self.throwable_object:draw()
-end
 
---- Dibuja barras para la ui que actualizan el valor
-function Game:draw_bar(x, y, width, height, value, max_value)
-    
     if not self.is_playing then
         return
     end
 
+    self.player:draw()
+    self.owner:draw()
+
+    for _, object in ipairs(self.throwable_objects) do
+        object:draw()
+    end
+end
+
+--- Dibuja barras para la ui que actualizan el valor
+function Game:draw_bar(x, y, width, height, value, max_value, target_min, target_max)
+    
     -- Fondo de la barra
     love.graphics.setColor(0.3, 0.3, 0.3)
     love.graphics.rectangle("fill", x, y, width, height)
 
-    -- Relleno de la barra
+    -- Rango a alcanzar para ganar
+    local target_x = x + width * (target_min / max_value)
+    local target_width = width * ((target_max - target_min) / max_value)
+
+    love.graphics.setColor(0.7, 0.7, 0.7)
+    love.graphics.rectangle("fill", target_x, y, target_width, height)
+
+    -- Estado actual de la barra
     local fill_width = width * (value / max_value)
 
     love.graphics.setColor(1, 1, 1)
+
     love.graphics.rectangle("fill", x, y, fill_width, height)
 
-    -- Vuelvo al blanco para que no altere el dibujado del resto del juego 
-    love.graphics.setColor(1, 1, 1)
+    love.graphics.setColor(1, 1, 1) -- Vuelvo al blanco para no alterar el resto del dibujado
 
 
 end
 
--- Dibula la UI
+
+function Game:draw_result()
+
+    if self.is_won then
+
+        love.graphics.print("HAS GANADO!", 125, 70)
+        love.graphics.print("Conseguiste la quinta porción de comida de la mañana", 125, 90)
+        love.graphics.print("Presiona R para reiniciar", 125, 110)
+
+    elseif self.is_game_over then
+
+        love.graphics.print("HAS PERDIDO", 125, 70)
+        love.graphics.print("Presiona R para reiniciar", 125, 110)
+
+        if self.owner.annoyment >= 100 then
+            love.graphics.print("Que hartante! Tu dueña te ha encerrado en la habitación", 125, 90) 
+        elseif self.owner.tenderness >= 100 then
+            love.graphics.print("Exceso de terunar! Tu dueña te ha atrapado en un abrazo no solicitado", 125, 90)
+
+        end
+
+
+
+    end
+
+end
+
 function Game:draw_ui()
 
     -- Barras de ternura y agotamiento de la dueña
-
-    love.graphics.print("Ternura", 10, 10)
-    self:draw_bar(10, 30, 200, 15, self.owner.tenderness, 100)
+    if self.is_playing then
+        love.graphics.print("Ternura", 10, 10)
+    self:draw_bar(10, 30, 200, 15, self.owner.tenderness, 100,
+        self.tenderness_min, self.tenderness_max)
     love.graphics.print("Hartazgo", 220, 10)
-    self:draw_bar(220, 30, 200, 15, self.owner.annoyment, 100)
+    self:draw_bar(220, 30, 200, 15, self.owner.annoyment, 100,
+        self.annoyment_min, self. annoyment_max)   
+    end
+
+    self:draw_result()
+
 end
 
 return Game
