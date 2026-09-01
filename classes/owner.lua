@@ -8,6 +8,20 @@ Owner.__index = Owner
 
 -- ============= INICIALIZACION ==============
 
+-- Funcion especifica para cargar las animaciones de player
+function Owner:load_animations()
+    
+    self.animations = {}
+
+    -- Funcion local aprovechando los parametros que comparte el spritesheet de player
+    local function create_animation(row, frames_count, speed) 
+        return Animation:new("assets/cat_spritesheet.png", row, frames_count, 32, 32, speed, false)
+    end
+
+    self.animations.walk_right = Animation:new("assets/walk_Right_Down.png", 0, 8, 48, 64, 7, false)
+    self.animations.walk_left = Animation:new("assets/walk_Left_Down.png", 0, 8, 48, 64, 7, false)
+end
+
 function Owner:new(pos_x, pos_y)
     
     local owner = setmetatable({}, Owner)
@@ -18,6 +32,10 @@ function Owner:new(pos_x, pos_y)
     owner.radius = 10
     owner.width = 30
     owner.height = 30
+
+    owner:load_animations()
+
+    owner.animation = owner.animations.walk_right
 
     owner.annoyment = 0 --Barra de hartazgo
     owner.tenderness = 0 --Barra de ternura
@@ -62,19 +80,26 @@ function Owner:update (dt)
 
     -- prototipo del movimiento de la dueña
     
-    if self.x + self.radius >= SCREEN_WIDTH or
-    self.x <= 0 then 
+    if self.x + self.radius >= SCREEN_WIDTH then
         self.speed = self.speed * -1
+        self.animation = self.animations.walk_left
+    end
+
+    if self.x <= 0 then 
+        self.speed = self.speed * -1
+        self.animation = self.animations.walk_right
     end
 
     self.x = self.x + self.speed * dt
+
+    self.animation:update(dt)
 
 end
 
 -- ============= DIBUJADO ============
 
 function Owner:draw ()
-    love.graphics.circle("fill", self.x, self.y, 10)
+    self.animation:render(self.x, self.y)
 end
 
 return Owner

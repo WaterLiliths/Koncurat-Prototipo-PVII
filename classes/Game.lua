@@ -14,7 +14,7 @@ function Game:new()
     local game = setmetatable({}, Game)
 
     game.player = Player:new(160, 90)
-    game.owner = Owner:new(100, 120)
+    game.owner = Owner:new(100, 200)
 
     game.throwable_objects = {}
 
@@ -24,7 +24,7 @@ function Game:new()
     table.insert(game.throwable_objects, ThrowableObject:new(300, 250))
     table.insert(game.throwable_objects, ThrowableObject:new(350, 100))
     table.insert(game.throwable_objects, ThrowableObject:new(20, 220))
-    table.insert(game.throwable_objects, ThrowableObject:new(150, 280))
+    table.insert(game.throwable_objects, ThrowableObject:new(150, 260))
     table.insert(game.throwable_objects, ThrowableObject:new(50, 100))
 
 
@@ -70,6 +70,7 @@ function Game:interact()
 
         self.owner:change_tenderness(10)
         self.owner:change_annoyment(-5)
+        self.player.meow_sound:play()
         
     end
 
@@ -182,12 +183,13 @@ function Game:draw ()
         return
     end
 
-    self.player:draw()
-    self.owner:draw()
-
     for _, object in ipairs(self.throwable_objects) do
         object:draw()
     end
+
+    self.owner:draw()
+    self.player:draw()
+
 end
 
 --- Dibuja barras para la ui que actualizan el valor
@@ -233,7 +235,7 @@ function Game:draw_result()
         if self.owner.annoyment >= 100 then
             love.graphics.print("Que hartante! Tu dueña te ha encerrado en la habitación", 125, 90) 
         elseif self.owner.tenderness >= 100 then
-            love.graphics.print("Exceso de terunar! Tu dueña te ha atrapado en un abrazo no solicitado", 125, 90)
+            love.graphics.print("Exceso de ternura! Tu dueña te ha atrapado en un abrazo no solicitado", 125, 90)
 
         end
 
@@ -248,11 +250,15 @@ function Game:draw_ui()
     -- Barras de ternura y agotamiento de la dueña
     if self.is_playing then
         love.graphics.print("Ternura", 10, 10)
-    self:draw_bar(10, 30, 200, 15, self.owner.tenderness, 100,
-        self.tenderness_min, self.tenderness_max)
-    love.graphics.print("Hartazgo", 220, 10)
-    self:draw_bar(220, 30, 200, 15, self.owner.annoyment, 100,
-        self.annoyment_min, self. annoyment_max)   
+        self:draw_bar(10, 30, 200, 15, self.owner.tenderness, 100,
+            self.tenderness_min, self.tenderness_max)
+        love.graphics.print("Hartazgo", 220, 10)
+        self:draw_bar(220, 30, 200, 15, self.owner.annoyment, 100,
+            self.annoyment_min, self. annoyment_max)
+        
+        love.graphics.print("Presiona las flechas para moverte/'E' para interactuar", 10, 50)
+        love.graphics.print("Alcanza nos niveles de ternura y hartazgo necesarios para que tu dueña te de de comer, otra vez",
+        10, 70)
     end
 
     self:draw_result()

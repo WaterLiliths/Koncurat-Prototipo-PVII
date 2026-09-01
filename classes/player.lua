@@ -1,5 +1,6 @@
 -- =========== MODULOS/CLASES REQUERIDAS ===============
 local Animation = require("classes.animations")
+local Sound = require("classes.sound")
 
 -- =============== CLASE =====================
 
@@ -37,6 +38,7 @@ function Player:new(pos_x, pos_y)
     player.interaction_requested = false
 
     player:load_animations()
+    player.meow_sound = Sound:new("sound/cat_meowing.mp3") 
     
     player.animation = player.animations.idle
 
@@ -48,7 +50,7 @@ end
 function Player:interact()
 
     self.interaction_requested = true
-    
+
 end
 
 function Player:keypressed(key)
