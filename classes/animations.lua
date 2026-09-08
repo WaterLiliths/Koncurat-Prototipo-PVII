@@ -1,6 +1,6 @@
+local Class = require("libraries.class")
 -- ============== CLASE ===============
-local Animation = {}
-Animation.__index = Animation
+local Animation = Class()
 
 -- =============== INICIALIZACION ==================
 
@@ -12,38 +12,34 @@ Animation.__index = Animation
 ---@param height number alto de cada sprite
 ---@param speed number velocidad a la que se reproduce la animacion
 ---@param is_vertical boolean sentido de avance de las animaciones en el spritesheet
-function Animation:new(img, index, frames_count, width, height, speed, is_vertical)
+function Animation:init(img, index, frames_count, width, height, speed, is_vertical)
 
-    local animation = setmetatable({}, Animation)
-
-    animation.width = width
-    animation.height = height
-    animation.origin_x = width / 2
-    animation.origin_y = height / 2
-    animation.spritesheet = love.graphics.newImage(img)
-    animation.iterator = 1
-    animation.speed = speed
-    animation.quads = {}
-    animation.is_active = true
+    self.width = width
+    self.height = height
+    self.origin_x = width / 2
+    self.origin_y = height / 2
+    self.spritesheet = love.graphics.newImage(img)
+    self.iterator = 1
+    self.speed = speed
+    self.quads = {}
+    self.is_active = true
 
     if is_vertical then
         -- (frames_count - 1) por claridad al calcular la cantidad de frames a cargar
         for i = 0, frames_count - 1, 1 do
-           table.insert(animation.quads,
-        love.graphics.newQuad(animation.width * index, animation.height * i, animation.width, animation.height, 
-        animation.spritesheet)
+           table.insert(self.quads,
+        love.graphics.newQuad(self.width * index, self.height * i, self.width, self.height, 
+        self.spritesheet)
         ) 
         end
     else
         for i = 0, frames_count -1, 1 do
-          table.insert(animation.quads,
-        love.graphics.newQuad(animation.width * i, animation.height * index, animation.width, animation.height,
-        animation.spritesheet)
+          table.insert(self.quads,
+        love.graphics.newQuad(self.width * i, self.height * index, self.width, self.height,
+        self.spritesheet)
         )  
         end
     end
-
-    return animation
 end
 
 -- ============== ACTUALIZACION =================

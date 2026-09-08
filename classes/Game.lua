@@ -1,44 +1,40 @@
 -- Clase encargada de manejar la lógica del juego
-
+local Class = require("libraries.class")
 local Player = require("classes.player")
 local Owner = require("classes.owner")
 local ThrowableObject = require("classes.throwableobject")
 
-local Game = {}
-Game.__index = Game
+local Game = Class()
 
 -- ============ INICIALIZACION ==================
 
-function Game:new()
+function Game:init()
 
-    local game = setmetatable({}, Game)
+    self.player = Player(160, 90)
+    self.owner = Owner(100, 200)
 
-    game.player = Player:new(160, 90)
-    game.owner = Owner:new(100, 200)
+    self.throwable_objects = {}
 
-    game.throwable_objects = {}
-
-    table.insert(game.throwable_objects, ThrowableObject:new(50, 70))
-    table.insert(game.throwable_objects, ThrowableObject:new(200, 50))
-    table.insert(game.throwable_objects, ThrowableObject:new(250, 120))
-    table.insert(game.throwable_objects, ThrowableObject:new(300, 250))
-    table.insert(game.throwable_objects, ThrowableObject:new(350, 100))
-    table.insert(game.throwable_objects, ThrowableObject:new(20, 220))
-    table.insert(game.throwable_objects, ThrowableObject:new(150, 260))
-    table.insert(game.throwable_objects, ThrowableObject:new(50, 100))
+    table.insert(self.throwable_objects, ThrowableObject(50, 70))
+    table.insert(self.throwable_objects, ThrowableObject(200, 50))
+    table.insert(self.throwable_objects, ThrowableObject(250, 120))
+    table.insert(self.throwable_objects, ThrowableObject(300, 250))
+    table.insert(self.throwable_objects, ThrowableObject(350, 100))
+    table.insert(self.throwable_objects, ThrowableObject(20, 220))
+    table.insert(self.throwable_objects, ThrowableObject(150, 260))
+    table.insert(self.throwable_objects, ThrowableObject(50, 100))
 
 
-    game.annoyment_min = 40
-    game.tenderness_min = 60
+    self.annoyment_min = 40
+    self.tenderness_min = 60
 
-    game.annoyment_max = 60
-    game.tenderness_max = 80
+    self.annoyment_max = 60
+    self.tenderness_max = 80
 
-    game.is_playing = true
-    game.is_won = false
-    game.is_game_over = false
+    self.is_playing = true
+    self.is_won = false
+    self.is_game_over = false
 
-    return game
 end
 
 -- ============ LOGICA ============
@@ -154,19 +150,19 @@ end
 
 function Game:restart()
 
-    self.player = Player:new(160, 90)
-    self.owner = Owner:new(100, 120)
+    self.player = Player(160, 90)
+    self.owner = Owner(100, 120)
 
     self.throwable_objects = {}
 
-    table.insert(self.throwable_objects, ThrowableObject:new(50, 70))
-    table.insert(self.throwable_objects, ThrowableObject:new(200, 50))
-    table.insert(self.throwable_objects, ThrowableObject:new(250, 120))
-    table.insert(self.throwable_objects, ThrowableObject:new(300, 250))
-    table.insert(self.throwable_objects, ThrowableObject:new(350, 100))
-    table.insert(self.throwable_objects, ThrowableObject:new(20, 220))
-    table.insert(self.throwable_objects, ThrowableObject:new(150, 280))
-    table.insert(self.throwable_objects, ThrowableObject:new(50, 100))
+    table.insert(self.throwable_objects, ThrowableObject(50, 70))
+    table.insert(self.throwable_objects, ThrowableObject(200, 50))
+    table.insert(self.throwable_objects, ThrowableObject(250, 120))
+    table.insert(self.throwable_objects, ThrowableObject(300, 250))
+    table.insert(self.throwable_objects, ThrowableObject(350, 100))
+    table.insert(self.throwable_objects, ThrowableObject(20, 220))
+    table.insert(self.throwable_objects, ThrowableObject(150, 260))
+    table.insert(self.throwable_objects, ThrowableObject(50, 100))
 
 
     self.is_playing = true

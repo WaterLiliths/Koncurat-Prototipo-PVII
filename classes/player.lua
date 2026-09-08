@@ -1,11 +1,11 @@
 -- =========== MODULOS/CLASES REQUERIDAS ===============
 local Animation = require("classes.animations")
 local Sound = require("classes.sound")
+local Class = require("libraries.class")
 
 -- =============== CLASE =====================
 
-local Player = {} -- Lo creo como tabla local para protegerlo
-Player.__index = Player
+local Player = Class() -- Lo creo como tabla local para protegerlo
 
 -- ============= INICIALIZACION ==============
 
@@ -16,7 +16,7 @@ function Player:load_animations()
 
     -- Funcion local aprovechando los parametros que comparte el spritesheet de player
     local function create_animation(row, frames_count, speed) 
-        return Animation:new("assets/cat_spritesheet.png", row, frames_count, 32, 32, speed, false)
+        return Animation("assets/cat_spritesheet.png", row, frames_count, 32, 32, speed, false)
     end
 
     self.animations.idle = create_animation(29, 3, 5)
@@ -26,23 +26,21 @@ function Player:load_animations()
     self.animations.walk_left = create_animation(7, 8, 8)
 end
 
-function Player:new(pos_x, pos_y)
-    local player = setmetatable({}, Player)
+function Player:init(pos_x, pos_y)
+    self.x = pos_x
+    self.y = pos_y
+    self.width = 32 -- alto del sprite
+    self.height = 32 -- alto del sprite
+    self.speed = 100
 
-    player.x = pos_x
-    player.y = pos_y
-    player.width = 32 -- alto del sprite
-    player.height = 32 -- alto del sprite
-    player.speed = 100
+    self.interaction_requested = false
 
-    player.interaction_requested = false
-
-    player:load_animations()
-    player.meow_sound = Sound:new("sound/cat_meowing.mp3") 
+    self:load_animations()
+    self.meow_sound = Sound("sound/cat_meowing.mp3") 
     
-    player.animation = player.animations.idle
+    self.animation = self.animations.idle
 
-    return player
+
 end
 
 -- ============== FUNCIONES =================

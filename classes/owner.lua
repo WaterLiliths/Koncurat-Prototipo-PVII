@@ -1,10 +1,10 @@
 -- =========== MODULOS/CLASES REQUERIDAS ===============
 local Animation = require("classes.animations")
+local Class = require("libraries.class")
 
 -- =============== CLASE =====================
 
-local Owner = {} -- Lo creo como tabla local para protegerlo
-Owner.__index = Owner
+local Owner = Class() -- Lo creo como tabla local para protegerlo
 
 -- ============= INICIALIZACION ==============
 
@@ -13,34 +13,25 @@ function Owner:load_animations()
     
     self.animations = {}
 
-    -- Funcion local aprovechando los parametros que comparte el spritesheet de player
-    local function create_animation(row, frames_count, speed) 
-        return Animation:new("assets/cat_spritesheet.png", row, frames_count, 32, 32, speed, false)
-    end
-
-    self.animations.walk_right = Animation:new("assets/walk_Right_Down.png", 0, 8, 48, 64, 7, false)
-    self.animations.walk_left = Animation:new("assets/walk_Left_Down.png", 0, 8, 48, 64, 7, false)
+    self.animations.walk_right = Animation("assets/walk_Right_Down.png", 0, 8, 48, 64, 7, false)
+    self.animations.walk_left = Animation("assets/walk_Left_Down.png", 0, 8, 48, 64, 7, false)
 end
 
-function Owner:new(pos_x, pos_y)
-    
-    local owner = setmetatable({}, Owner)
+function Owner:init(pos_x, pos_y)
+    self.x = pos_x
+    self.y = pos_y
+    self. speed = 50
+    self.radius = 10
+    self.width = 30
+    self.height = 30
 
-    owner.x = pos_x
-    owner.y = pos_y
-    owner. speed = 50
-    owner.radius = 10
-    owner.width = 30
-    owner.height = 30
+    self:load_animations()
 
-    owner:load_animations()
+    self.animation = self.animations.walk_right
 
-    owner.animation = owner.animations.walk_right
+    self.annoyment = 0 --Barra de hartazgo
+    self.tenderness = 0 --Barra de ternura
 
-    owner.annoyment = 0 --Barra de hartazgo
-    owner.tenderness = 0 --Barra de ternura
-
-    return owner    
 end
 
 -- ================ LOGICA ==============
