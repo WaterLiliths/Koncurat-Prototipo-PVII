@@ -2,6 +2,9 @@
 local Animation = require("classes.animations")
 local Sound = require("classes.sound")
 local Class = require("libraries.class")
+local StateMachine = require("classes.states.stateMachine")
+local PlayerIdle = require("classes.states.playerIdle")
+local PlayerWalking = require("classes.states.playerWalking")
 
 -- =============== CLASE =====================
 
@@ -27,18 +30,25 @@ function Player:load_animations()
 end
 
 function Player:init(pos_x, pos_y)
+
     self.x = pos_x
     self.y = pos_y
     self.width = 32 -- alto del sprite
     self.height = 32 -- alto del sprite
     self.speed = 100
+    self.moving = false
 
     self.interaction_requested = false
 
     self:load_animations()
     self.meow_sound = Sound("sound/cat_meowing.mp3") 
-    
-    self.animation = self.animations.idle
+
+    self.PlayerStateMachine = StateMachine {
+        ['idle'] = function () return PlayerIdle(self) end,
+        ['walking'] = function () return PlayerWalking(self) end
+    }
+
+    self.PlayerStateMachine:change_state('idle')
 
 
 end
@@ -61,40 +71,14 @@ end
 
 function Player:update(dt) --Se va a refactorizar luego con Maquinas de Estado/otras funciones
 
-    local moving = false
-
-    if love.keyboard.isDown("right") then
-        self.animation = self.animations.walk_right
-        self.x = self.x + self.speed * dt
-        moving = true
-    end
-    if love.keyboard.isDown("left") then
-        self.x = self.x - self.speed * dt
-        self.animation = self.animations.walk_left
-        moving = true
-    end
-    if love.keyboard.isDown("up") then
-        self.y = self.y - self.speed * dt
-        self.animation = self.animations.walk_up
-        moving = true
-    end
-    if love.keyboard.isDown("down") then
-        self.y = self.y + self.speed * dt
-        self.animation = self.animations.walk_down
-        moving = true
-    end
-
-    if not moving then
-        self.animation = self.animations.idle
-    end
-    self.animation:update(dt)
+self.PlayerStateMachine:update(dt)
 
 end
 
 -- ============ DIBUJADO ==================
 function Player:draw()
 
-    self.animation:render(self.x, self.y)
+    self.PlayerStateMachine:render()
 end
 
 return Player

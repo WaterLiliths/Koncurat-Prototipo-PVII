@@ -1,4 +1,4 @@
-local Game = require("classes.Game")
+local Game = require("classes.game")
 
 -- ======= RESOLUCION =======
 SCREEN_WIDTH = 400 -- Para ancho 800
