@@ -1,8 +1,19 @@
 -- Clase encargada de manejar la lógica del juego
+
+-- ============ REQUIERE ==================
 local Class = require("libraries.class")
 local Player = require("classes.player")
 local Owner = require("classes.owner")
 local ThrowableObject = require("classes.throwableobject")
+
+-- FSM requisitos
+local StateMachine = require("classes.states.stateMachine")
+local GameMainMenu = require("classes.states.gameMainMenu")
+local GamePlaying = require("classes.states.gamePlaying")
+local GameWon = require("classes.states.gameWon")
+local GameOver = require("classes.states.gameOver")
+
+-- ==================== CLASE =================
 
 local Game = Class()
 
@@ -34,6 +45,15 @@ function Game:init()
     self.is_playing = true
     self.is_won = false
     self.is_game_over = false
+
+    self.GameStateMachine = StateMachine{
+        ['main_menu'] = function () return GameMainMenu(self) end,
+        ['playing'] = function () return GamePlaying(self) end,
+        ['game_won'] = function () return GameWon(self) end,
+        ['game_over'] = function () return GameOver(self) end
+    }
+
+    self.GameStateMachine:change_state("main_menu")
 
 end
 
@@ -85,11 +105,7 @@ end
 
 function Game:keypressed(key)
 
-    if self.is_won or self.is_game_over then
-        if key == "r" then
-            self:restart()
-        end
-    end
+    self.GameStateMachine:keypressed(key)
 
     self.player:keypressed(key)
 end
@@ -133,19 +149,7 @@ end
 
 function Game:update (dt)
 
-    if not self.is_playing then
-        return
-    end
-
-    self:interact()
-
-    self.player:update(dt)
-    self.owner:update(dt)
-
-    self:remove_destroyed_objects()
-
-    self:win_game()
-    self:lose_game()
+    self.GameStateMachine:update(dt)
 
 
 end
@@ -171,23 +175,15 @@ function Game:restart()
     self.is_won = false
     self.is_game_over = false
 
+    self.GameStateMachine:change_state("playing")
+
 end
 
 -- ============ DIBUJADO ============
 
 function Game:draw ()
 
-    if not self.is_playing then
-        return
-    end
-
-    for _, object in ipairs(self.throwable_objects) do
-        object:draw()
-    end
-
-    self.owner:draw()
-    self.player:draw()
-
+    self.GameStateMachine:render()
 end
 
 --- Dibuja barras para la ui que actualizan el valor
@@ -245,21 +241,7 @@ end
 
 function Game:draw_ui()
 
-    -- Barras de ternura y agotamiento de la dueña
-    if self.is_playing then
-        love.graphics.print("Ternura", 10, 10)
-        self:draw_bar(10, 30, 200, 15, self.owner.tenderness, 100,
-            self.tenderness_min, self.tenderness_max)
-        love.graphics.print("Hartazgo", 220, 10)
-        self:draw_bar(220, 30, 200, 15, self.owner.annoyment, 100,
-            self.annoyment_min, self. annoyment_max)
-        
-        love.graphics.print("Presiona las flechas para moverte/'E' para interactuar", 10, 50)
-        love.graphics.print("Alcanza nos niveles de ternura y hartazgo necesarios para que tu dueña te de de comer, otra vez",
-        10, 70)
-    end
-
-    self:draw_result()
+    self.GameStateMachine:render_ui()
 
 end
 
