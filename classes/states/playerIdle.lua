@@ -1,6 +1,8 @@
+-- ============= REQUERIMIENTOS ================
 local Class = require("libraries.class")
 local State = require("classes.states.state")
 
+-- ========== CLASE =====================
 local PlayerIdle = Class{__includes = State}
 
 function PlayerIdle:init(player)
@@ -20,6 +22,11 @@ function  PlayerIdle:update(dt)
     or love.keyboard.isDown("right") then
         return "walking"
     end
+
+    if self.player.interaction then
+        return "interacting", self.player.interaction
+    end
+
 end
 
 function PlayerIdle:render()

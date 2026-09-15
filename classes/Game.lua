@@ -56,6 +56,7 @@ function Game:interact()
     for _, object in ipairs(self.throwable_objects) do
         if self:check_collision(self.player, object) then
             object:throw()
+            self.player:set_interaction("throw")
             self.owner:change_annoyment(15)
             self.owner:change_tenderness(-10)
             break
@@ -63,7 +64,7 @@ function Game:interact()
     end
 
     if self:check_collision(self.player, self.owner) then
-
+        self.player:set_interaction("cute")
         self.owner:change_tenderness(10)
         self.owner:change_annoyment(-5)
         self.player.meow_sound:play()
@@ -136,10 +137,11 @@ function Game:update (dt)
         return
     end
 
+    self:interact()
+
     self.player:update(dt)
     self.owner:update(dt)
 
-    self:interact()
     self:remove_destroyed_objects()
 
     self:win_game()

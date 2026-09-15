@@ -12,7 +12,8 @@ local Animation = Class()
 ---@param height number alto de cada sprite
 ---@param speed number velocidad a la que se reproduce la animacion
 ---@param is_vertical boolean sentido de avance de las animaciones en el spritesheet
-function Animation:init(img, index, frames_count, width, height, speed, is_vertical)
+---@param loop boolean la animacion loopea o termina
+function Animation:init(img, index, frames_count, width, height, speed, is_vertical, loop)
 
     self.width = width
     self.height = height
@@ -23,6 +24,8 @@ function Animation:init(img, index, frames_count, width, height, speed, is_verti
     self.speed = speed
     self.quads = {}
     self.is_active = true
+    self.loop = loop
+    self.is_finished = false
 
     if is_vertical then
         -- (frames_count - 1) por claridad al calcular la cantidad de frames a cargar
@@ -46,14 +49,25 @@ end
 
 function Animation:update(dt)
 
-    if not self.is_active then --condicion de corte
+    if not self.is_active or self.is_finished then --condicion de corte
         return
     end
 
     self.iterator = self.iterator + (self.speed * dt)
+
     if self.iterator >= #self.quads + 1 then
-        self.iterator = 1
+        if self.loop then
+            self.iterator = 1
+        else
+            self.iterator = #self.quads
+            self.is_finished = true
+        end
     end
+end
+
+function Animation:reset()
+    self.iterator = 1
+    self.is_finished = false
 end
 
 -- ================ DIBUJADO ===================

@@ -5,6 +5,7 @@ local Class = require("libraries.class")
 local StateMachine = require("classes.states.stateMachine")
 local PlayerIdle = require("classes.states.playerIdle")
 local PlayerWalking = require("classes.states.playerWalking")
+local PlayerInteracting = require("classes.states.playerInteracting")
 
 -- =============== CLASE =====================
 
@@ -18,15 +19,17 @@ function Player:load_animations()
     self.animations = {}
 
     -- Funcion local aprovechando los parametros que comparte el spritesheet de player
-    local function create_animation(row, frames_count, speed) 
-        return Animation("assets/cat_spritesheet.png", row, frames_count, 32, 32, speed, false)
+    local function create_animation(row, frames_count, speed, loop) 
+        return Animation("assets/cat_spritesheet.png", row, frames_count, 32, 32, speed, false, loop)
     end
 
-    self.animations.idle = create_animation(29, 3, 5)
-    self.animations.walk_down = create_animation(4, 4, 6)
-    self.animations.walk_up = create_animation(5, 4, 6)
-    self.animations.walk_right = create_animation(6, 8, 8)
-    self.animations.walk_left = create_animation(7, 8, 8)
+    self.animations.idle = create_animation(29, 3, 5, true)
+    self.animations.walk_down = create_animation(4, 4, 6, true)
+    self.animations.walk_up = create_animation(5, 4, 6, true)
+    self.animations.walk_right = create_animation(6, 8, 8, true)
+    self.animations.walk_left = create_animation(7, 8, 8, true)
+    self.animations.throw = create_animation(44, 9, 8, false)
+    self.animations.cute = create_animation(52, 4, 6, false)
 end
 
 function Player:init(pos_x, pos_y)
@@ -45,7 +48,8 @@ function Player:init(pos_x, pos_y)
 
     self.PlayerStateMachine = StateMachine {
         ['idle'] = function () return PlayerIdle(self) end,
-        ['walking'] = function () return PlayerWalking(self) end
+        ['walking'] = function () return PlayerWalking(self) end,
+        ['interacting'] = function (interaction) return PlayerInteracting(self, interaction) end
     }
 
     self.PlayerStateMachine:change_state('idle')
@@ -54,6 +58,10 @@ function Player:init(pos_x, pos_y)
 end
 
 -- ============== FUNCIONES =================
+
+function Player:set_interaction(interaction) --Para saber que tipo de interaccion toca
+    self.interaction = interaction
+end
 
 function Player:interact()
 
@@ -69,7 +77,7 @@ end
 
 -- ============== ACTUALIZACION ==============
 
-function Player:update(dt) --Se va a refactorizar luego con Maquinas de Estado/otras funciones
+function Player:update(dt)
 
 self.PlayerStateMachine:update(dt)
 

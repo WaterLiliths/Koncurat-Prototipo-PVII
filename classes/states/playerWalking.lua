@@ -1,6 +1,8 @@
+-- ============= REQUERIMIENTOS ================
 local Class = require("libraries.class")
 local State = require("classes.states.state")
 
+-- ========== CLASE =====================
 local PlayerWalking = Class{__includes = State}
 
 function PlayerWalking:init(player)
@@ -35,6 +37,10 @@ function  PlayerWalking:update(dt)
     end
 
     self.player.animation:update(dt)
+
+    if self.player.interaction then
+        return "interacting", self.player.interaction
+    end
 
     if not self.player.moving then
         return "idle"
