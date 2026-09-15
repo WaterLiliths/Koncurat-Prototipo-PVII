@@ -42,10 +42,6 @@ function Game:init()
     self.annoyment_max = 60
     self.tenderness_max = 80
 
-    self.is_playing = true
-    self.is_won = false
-    self.is_game_over = false
-
     self.GameStateMachine = StateMachine{
         ['main_menu'] = function () return GameMainMenu(self) end,
         ['playing'] = function () return GamePlaying(self) end,
@@ -131,26 +127,11 @@ function Game:check_lose_condition ()
 
 end
 
-function Game:win_game()
-    if self:check_win_condition() then
-        self.is_playing = false
-        self.is_won = true
-    end
-end
-
-function Game:lose_game()
-    if self:check_lose_condition() then
-        self.is_playing = false
-        self.is_game_over = true
-    end
-end
-
 -- ============ ACTUALIZACION =========
 
 function Game:update (dt)
 
     self.GameStateMachine:update(dt)
-
 
 end
 
@@ -169,11 +150,6 @@ function Game:restart()
     table.insert(self.throwable_objects, ThrowableObject(20, 220))
     table.insert(self.throwable_objects, ThrowableObject(150, 260))
     table.insert(self.throwable_objects, ThrowableObject(50, 100))
-
-
-    self.is_playing = true
-    self.is_won = false
-    self.is_game_over = false
 
     self.GameStateMachine:change_state("playing")
 
@@ -209,33 +185,6 @@ function Game:draw_bar(x, y, width, height, value, max_value, target_min, target
 
     love.graphics.setColor(1, 1, 1) -- Vuelvo al blanco para no alterar el resto del dibujado
 
-
-end
-
-
-function Game:draw_result()
-
-    if self.is_won then
-
-        love.graphics.print("HAS GANADO!", 125, 70)
-        love.graphics.print("Conseguiste la quinta porción de comida de la mañana", 125, 90)
-        love.graphics.print("Presiona R para reiniciar", 125, 110)
-
-    elseif self.is_game_over then
-
-        love.graphics.print("HAS PERDIDO", 125, 70)
-        love.graphics.print("Presiona R para reiniciar", 125, 110)
-
-        if self.owner.annoyment >= 100 then
-            love.graphics.print("Que hartante! Tu dueña te ha encerrado en la habitación", 125, 90) 
-        elseif self.owner.tenderness >= 100 then
-            love.graphics.print("Exceso de ternura! Tu dueña te ha atrapado en un abrazo no solicitado", 125, 90)
-
-        end
-
-
-
-    end
 
 end
 
