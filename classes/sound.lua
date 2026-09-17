@@ -1,15 +1,12 @@
+local Class = require("libraries.class")
 -- =========== CLASE ===========
-local Sound = {}
-Sound.__index = Sound
+local Sound = Class()
 
 -- =========== INICIALIZACION ==============
-function Sound:new(path)
+function Sound:init(path)
 
-    local sound = setmetatable({}, Sound)
+    self.source = love.audio.newSource(path, "static")
 
-    sound.source = love.audio.newSource(path, "static")
-
-    return sound
 end
 
 -- ================ ACTUALIZACION =============

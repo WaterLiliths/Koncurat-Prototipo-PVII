@@ -1,4 +1,4 @@
-local Game = require("classes.Game")
+local Game = require("classes.game")
 
 -- ======= RESOLUCION =======
 SCREEN_WIDTH = 400 -- Para ancho 800
@@ -12,7 +12,7 @@ function love.load ()
     love.window.setMode(SCREEN_WIDTH * SCALE, SCREEN_HEIGHT * SCALE)
     love.graphics.setDefaultFilter("nearest", "nearest")
     canvas = love.graphics.newCanvas(SCREEN_WIDTH, SCREEN_HEIGHT)
-    game = Game:new()
+    game = Game()
 end
 
 function love.update (dt)
