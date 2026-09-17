@@ -5,6 +5,7 @@ local Class = require("libraries.class")
 local Player = require("classes.player")
 local Owner = require("classes.owner")
 local ThrowableObject = require("classes.throwableobject")
+local sti = require("libraries.sti")
 
 -- FSM requisitos
 local StateMachine = require("classes.states.stateMachine")
@@ -35,6 +36,8 @@ function Game:init()
     table.insert(self.throwable_objects, ThrowableObject(150, 260))
     table.insert(self.throwable_objects, ThrowableObject(50, 100))
 
+    self.map = nil
+    self.map = sti("map/map_one.lua")
 
     self.annoyment_min = 40
     self.tenderness_min = 60

@@ -34,6 +34,8 @@ end
 
 function GamePlaying:render()
 
+    self.game.map:draw()
+
     for _, object in ipairs(self.game.throwable_objects) do
         object:draw()
     end
