@@ -13,8 +13,8 @@ function Owner:load_animations()
     
     self.animations = {}
 
-    self.animations.walk_right = Animation("assets/walk_Right_Down.png", 0, 8, 48, 64, 7, false)
-    self.animations.walk_left = Animation("assets/walk_Left_Down.png", 0, 8, 48, 64, 7, false)
+    self.animations.walk_right = Animation("assets/walk_Right_Down.png", 0, 8, 48, 64, 7, false, true)
+    self.animations.walk_left = Animation("assets/walk_Left_Down.png", 0, 8, 48, 64, 7, false, true)
 end
 
 function Owner:init(pos_x, pos_y)

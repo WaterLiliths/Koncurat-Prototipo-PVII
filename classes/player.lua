@@ -2,6 +2,10 @@
 local Animation = require("classes.animations")
 local Sound = require("classes.sound")
 local Class = require("libraries.class")
+local StateMachine = require("classes.states.stateMachine")
+local PlayerIdle = require("classes.states.playerIdle")
+local PlayerWalking = require("classes.states.playerWalking")
+local PlayerInteracting = require("classes.states.playerInteracting")
 
 -- =============== CLASE =====================
 
@@ -15,35 +19,49 @@ function Player:load_animations()
     self.animations = {}
 
     -- Funcion local aprovechando los parametros que comparte el spritesheet de player
-    local function create_animation(row, frames_count, speed) 
-        return Animation("assets/cat_spritesheet.png", row, frames_count, 32, 32, speed, false)
+    local function create_animation(row, frames_count, speed, loop) 
+        return Animation("assets/cat_spritesheet.png", row, frames_count, 32, 32, speed, false, loop)
     end
 
-    self.animations.idle = create_animation(29, 3, 5)
-    self.animations.walk_down = create_animation(4, 4, 6)
-    self.animations.walk_up = create_animation(5, 4, 6)
-    self.animations.walk_right = create_animation(6, 8, 8)
-    self.animations.walk_left = create_animation(7, 8, 8)
+    self.animations.idle = create_animation(29, 3, 5, true)
+    self.animations.walk_down = create_animation(4, 4, 6, true)
+    self.animations.walk_up = create_animation(5, 4, 6, true)
+    self.animations.walk_right = create_animation(6, 8, 8, true)
+    self.animations.walk_left = create_animation(7, 8, 8, true)
+    self.animations.throw = create_animation(44, 9, 8, false)
+    self.animations.cute = create_animation(52, 4, 6, false)
 end
 
 function Player:init(pos_x, pos_y)
+
     self.x = pos_x
     self.y = pos_y
     self.width = 32 -- alto del sprite
     self.height = 32 -- alto del sprite
     self.speed = 100
+    self.moving = false
 
     self.interaction_requested = false
 
     self:load_animations()
     self.meow_sound = Sound("sound/cat_meowing.mp3") 
-    
-    self.animation = self.animations.idle
+
+    self.PlayerStateMachine = StateMachine {
+        ['idle'] = function () return PlayerIdle(self) end,
+        ['walking'] = function () return PlayerWalking(self) end,
+        ['interacting'] = function (interaction) return PlayerInteracting(self, interaction) end
+    }
+
+    self.PlayerStateMachine:change_state('idle')
 
 
 end
 
 -- ============== FUNCIONES =================
+
+function Player:set_interaction(interaction) --Para saber que tipo de interaccion toca
+    self.interaction = interaction
+end
 
 function Player:interact()
 
@@ -59,42 +77,16 @@ end
 
 -- ============== ACTUALIZACION ==============
 
-function Player:update(dt) --Se va a refactorizar luego con Maquinas de Estado/otras funciones
+function Player:update(dt)
 
-    local moving = false
-
-    if love.keyboard.isDown("right") then
-        self.animation = self.animations.walk_right
-        self.x = self.x + self.speed * dt
-        moving = true
-    end
-    if love.keyboard.isDown("left") then
-        self.x = self.x - self.speed * dt
-        self.animation = self.animations.walk_left
-        moving = true
-    end
-    if love.keyboard.isDown("up") then
-        self.y = self.y - self.speed * dt
-        self.animation = self.animations.walk_up
-        moving = true
-    end
-    if love.keyboard.isDown("down") then
-        self.y = self.y + self.speed * dt
-        self.animation = self.animations.walk_down
-        moving = true
-    end
-
-    if not moving then
-        self.animation = self.animations.idle
-    end
-    self.animation:update(dt)
+self.PlayerStateMachine:update(dt)
 
 end
 
 -- ============ DIBUJADO ==================
 function Player:draw()
 
-    self.animation:render(self.x, self.y)
+    self.PlayerStateMachine:render()
 end
 
 return Player
