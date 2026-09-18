@@ -25,6 +25,12 @@ function Owner:init(pos_x, pos_y)
     self.width = 30
     self.height = 30
 
+    self.origin_x = self.width / 2
+    self.origin_y = self.height / 2
+
+    self.hitbox_x = self.x - self.width
+    self.hitbox_y = self.y - self.height
+
     self:load_animations()
 
     self.animation = self.animations.walk_right
@@ -83,6 +89,10 @@ function Owner:update (dt)
 
     self.x = self.x + self.speed * dt
 
+    self.hitbox_x = self.x - self.origin_x
+    self.hitbox_y = self.y - self.origin_y
+
+
     self.animation:update(dt)
 
 end
@@ -91,6 +101,15 @@ end
 
 function Owner:draw ()
     self.animation:render(self.x, self.y)
+end
+
+function Owner:draw_debug()
+
+    love.graphics.setColor(0,1,0)
+    love.graphics.circle("fill", self.x, self.y, 1)
+    love.graphics.rectangle("line", self.hitbox_x, self.hitbox_y, self.width, self.height)
+    love.graphics.setColor(1,1,1)
+
 end
 
 return Owner

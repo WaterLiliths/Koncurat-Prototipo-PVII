@@ -36,6 +36,9 @@ function  PlayerWalking:update(dt)
         self.player.moving = true
     end
 
+    self.player.hitbox_x = self.player.x - self.player.origin_x
+    self.player.hitbox_y = self.player.y - self.player.origin_y
+
     self.player.animation:update(dt)
 
     if self.player.interaction then

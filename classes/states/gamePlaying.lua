@@ -7,6 +7,9 @@ local GamePlaying = Class{__includes = State}
 
 function GamePlaying:init(game)
     self.game = game
+    
+    self.map_width = self.game.map.width * self.game.map.tilewidth
+    self.map_height = self.game.map.height * self.game.map.tileheight
 end
 
 function GamePlaying:enter()
@@ -18,6 +21,26 @@ function GamePlaying:update(dt)
     self.game:interact()
 
     self.game.player:update(dt)
+
+    self.game.main_camera:lookAt(self.game.player.x, self.game.player.y)
+
+    -- Control de los límites de la cámara
+    if self.game.main_camera.x < self.game.camera_center_x then
+        self.game.main_camera.x = self.game.camera_center_x
+    end
+
+    if self.game.main_camera.y < self.game.camera_center_y then
+        self.game.main_camera.y = self.game.camera_center_y
+    end
+
+    if self.game.main_camera.x > (self.map_width - self.game.camera_center_x) then
+        self.game.main_camera.x = (self.map_width - self.game.camera_center_x)
+    end
+
+    if self.game.main_camera.y > (self.map_height - self.game.camera_center_y) then
+        self.game.main_camera.y = (self.map_height - self.game.camera_center_y)
+    end
+
     self.game.owner:update(dt)
 
     self.game:remove_destroyed_objects()
@@ -34,14 +57,23 @@ end
 
 function GamePlaying:render()
 
-    self.game.map:draw()
-
+    self.game.main_camera:attach(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)
+    self.game.map:drawLayer(self.game.map.layers["ground"])
+    self.game.map:drawLayer(self.game.map.layers["grass"])
+    self.game.map:drawLayer(self.game.map.layers["floor"])
+    self.game.map:drawLayer(self.game.map.layers["walls"])
+    self.game.map:drawLayer(self.game.map.layers["divisions"])
+    
     for _, object in ipairs(self.game.throwable_objects) do
         object:draw()
     end
 
     self.game.owner:draw()
     self.game.player:draw()
+
+    self.game:draw_debug()
+
+    self.game.main_camera:detach()
 
     
 end

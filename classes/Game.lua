@@ -5,7 +5,8 @@ local Class = require("libraries.class")
 local Player = require("classes.player")
 local Owner = require("classes.owner")
 local ThrowableObject = require("classes.throwableobject")
-local sti = require("libraries.sti")
+local STI = require("libraries.sti")
+local Camera = require("libraries.camera")
 
 -- FSM requisitos
 local StateMachine = require("classes.states.stateMachine")
@@ -36,8 +37,15 @@ function Game:init()
     table.insert(self.throwable_objects, ThrowableObject(150, 260))
     table.insert(self.throwable_objects, ThrowableObject(50, 100))
 
-    self.map = nil
-    self.map = sti("map/map_one.lua")
+    self.debug = false
+    
+    -- MAPA
+    self.map = STI("map/map_one.lua")
+    
+    -- CAMARA
+    self.camera_center_x = SCREEN_WIDTH * 0.5
+    self.camera_center_y = SCREEN_HEIGHT * 0.5
+    self.main_camera = Camera()
 
     self.annoyment_min = 40
     self.tenderness_min = 60
@@ -60,10 +68,10 @@ end
 
 function Game:check_collision(a, b)
         return -- devuelve true si un objeto está "dentro" de otro
-        a.x < b.x + b.width and
-        a.x + a.width > b.x and
-        a.y < b.y + b.height and
-        a.y + a.height > b.y
+        a.hitbox_x < b.hitbox_x + b.width and
+        a.hitbox_x + a.width > b.hitbox_x and
+        a.hitbox_y < b.hitbox_y + b.height and
+        a.hitbox_y + a.height > b.hitbox_y
 end
 
 function Game:interact()
@@ -103,6 +111,10 @@ function Game:remove_destroyed_objects()
 end
 
 function Game:keypressed(key)
+
+    if key == "f1" then
+        debug = not debug
+    end
 
     self.GameStateMachine:keypressed(key)
 
@@ -195,6 +207,22 @@ function Game:draw_ui()
 
     self.GameStateMachine:render_ui()
 
+end
+
+function Game:draw_debug()
+
+    if debug then
+        return
+    end
+
+    self.player:draw_debug()
+    self.owner:draw_debug()
+
+    for _, object in ipairs(self.throwable_objects) do
+        object:draw_debug()
+    end
+
+    
 end
 
 return Game

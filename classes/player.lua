@@ -36,8 +36,16 @@ function Player:init(pos_x, pos_y)
 
     self.x = pos_x
     self.y = pos_y
+    
     self.width = 32 -- alto del sprite
     self.height = 32 -- alto del sprite
+
+    self.origin_x = self.width / 2
+    self.origin_y = self.height / 2
+
+    self.hitbox_x = self.x - self.width
+    self.hitbox_y = self.y - self.height
+
     self.speed = 100
     self.moving = false
 
@@ -87,6 +95,16 @@ end
 function Player:draw()
 
     self.PlayerStateMachine:render()
+
+end
+
+function Player:draw_debug()
+
+    love.graphics.setColor(0,1,0)
+    love.graphics.circle("fill", self.x, self.y, 1)
+    love.graphics.rectangle("line", self.hitbox_x, self.hitbox_y, self.width, self.height)
+    love.graphics.setColor(1,1,1)
+
 end
 
 return Player
