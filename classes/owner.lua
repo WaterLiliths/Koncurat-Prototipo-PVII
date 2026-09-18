@@ -17,10 +17,10 @@ function Owner:load_animations()
     self.animations.walk_left = Animation("assets/walk_Left_Down.png", 0, 8, 48, 64, 7, false, true)
 end
 
-function Owner:init(pos_x, pos_y)
+function Owner:init(pos_x, pos_y, world)
     self.x = pos_x
     self.y = pos_y
-    self. speed = 50
+    self.speed = 50
     self.radius = 10
     self.width = 30
     self.height = 30
@@ -31,12 +31,17 @@ function Owner:init(pos_x, pos_y)
     self.hitbox_x = self.x - self.width
     self.hitbox_y = self.y - self.height
 
+    self.world = world
+
     self:load_animations()
 
     self.animation = self.animations.walk_right
 
     self.annoyment = 0 --Barra de hartazgo
     self.tenderness = 0 --Barra de ternura
+
+    self.world:add(self, self.hitbox_x, self.hitbox_y, self.width, self.height)
+
 
 end
 
@@ -91,7 +96,7 @@ function Owner:update (dt)
 
     self.hitbox_x = self.x - self.origin_x
     self.hitbox_y = self.y - self.origin_y
-
+    self.world:update(self, self.hitbox_x, self.hitbox_y, self.width, self.height)
 
     self.animation:update(dt)
 

@@ -7,6 +7,7 @@ local Owner = require("classes.owner")
 local ThrowableObject = require("classes.throwableobject")
 local STI = require("libraries.sti")
 local Camera = require("libraries.camera")
+local Bump = require("libraries.bump")
 
 -- FSM requisitos
 local StateMachine = require("classes.states.stateMachine")
@@ -23,19 +24,21 @@ local Game = Class()
 
 function Game:init()
 
-    self.player = Player(160, 90)
-    self.owner = Owner(100, 200)
+    self.world = Bump.newWorld(32)
+    
+    self.player = Player(160, 90, self.world)
+    self.owner = Owner(100, 200, self.world)
 
     self.throwable_objects = {}
 
-    table.insert(self.throwable_objects, ThrowableObject(50, 70))
-    table.insert(self.throwable_objects, ThrowableObject(200, 50))
-    table.insert(self.throwable_objects, ThrowableObject(250, 120))
-    table.insert(self.throwable_objects, ThrowableObject(300, 250))
-    table.insert(self.throwable_objects, ThrowableObject(350, 100))
-    table.insert(self.throwable_objects, ThrowableObject(20, 220))
-    table.insert(self.throwable_objects, ThrowableObject(150, 260))
-    table.insert(self.throwable_objects, ThrowableObject(50, 100))
+    table.insert(self.throwable_objects, ThrowableObject(50, 70, self.world))
+    table.insert(self.throwable_objects, ThrowableObject(200, 50, self.world))
+    table.insert(self.throwable_objects, ThrowableObject(250, 120, self.world))
+    table.insert(self.throwable_objects, ThrowableObject(300, 250, self.world))
+    table.insert(self.throwable_objects, ThrowableObject(350, 100, self.world))
+    table.insert(self.throwable_objects, ThrowableObject(20, 220, self.world))
+    table.insert(self.throwable_objects, ThrowableObject(150, 260, self.world))
+    table.insert(self.throwable_objects, ThrowableObject(100, 100, self.world))
 
     self.debug = false
     
@@ -66,12 +69,16 @@ end
 
 -- ============ LOGICA ============
 
+--- Checkea si hay colision entre los objetos enviados por parametro
 function Game:check_collision(a, b)
-        return -- devuelve true si un objeto está "dentro" de otro
-        a.hitbox_x < b.hitbox_x + b.width and
-        a.hitbox_x + a.width > b.hitbox_x and
-        a.hitbox_y < b.hitbox_y + b.height and
-        a.hitbox_y + a.height > b.hitbox_y
+    local collisons = self.world:queryRect(a.hitbox_x, a.hitbox_y,
+    a.width, a.height) --guarda las colisiones con a
+
+    for _, item in ipairs(collisons) do
+        if item == b then
+            return true
+        end
+    end
 end
 
 function Game:interact()
@@ -113,7 +120,7 @@ end
 function Game:keypressed(key)
 
     if key == "f1" then
-        debug = not debug
+        self.debug = not self.debug
     end
 
     self.GameStateMachine:keypressed(key)
@@ -152,19 +159,23 @@ end
 
 function Game:restart()
 
-    self.player = Player(160, 90)
-    self.owner = Owner(100, 120)
+    self.world = Bump.newWorld(32)
+    
+    self.player = Player(160, 90, self.world)
+    self.owner = Owner(100, 200, self.world)
 
     self.throwable_objects = {}
 
-    table.insert(self.throwable_objects, ThrowableObject(50, 70))
-    table.insert(self.throwable_objects, ThrowableObject(200, 50))
-    table.insert(self.throwable_objects, ThrowableObject(250, 120))
-    table.insert(self.throwable_objects, ThrowableObject(300, 250))
-    table.insert(self.throwable_objects, ThrowableObject(350, 100))
-    table.insert(self.throwable_objects, ThrowableObject(20, 220))
-    table.insert(self.throwable_objects, ThrowableObject(150, 260))
-    table.insert(self.throwable_objects, ThrowableObject(50, 100))
+    table.insert(self.throwable_objects, ThrowableObject(50, 70, self.world))
+    table.insert(self.throwable_objects, ThrowableObject(200, 50, self.world))
+    table.insert(self.throwable_objects, ThrowableObject(250, 120, self.world))
+    table.insert(self.throwable_objects, ThrowableObject(300, 250, self.world))
+    table.insert(self.throwable_objects, ThrowableObject(350, 100, self.world))
+    table.insert(self.throwable_objects, ThrowableObject(20, 220, self.world))
+    table.insert(self.throwable_objects, ThrowableObject(150, 260, self.world))
+    table.insert(self.throwable_objects, ThrowableObject(100, 100, self.world))
+
+    self.debug = false
 
     self.GameStateMachine:change_state("playing")
 
@@ -211,16 +222,22 @@ end
 
 function Game:draw_debug()
 
-    if debug then
+    if not self.debug then
         return
     end
 
-    self.player:draw_debug()
-    self.owner:draw_debug()
-
-    for _, object in ipairs(self.throwable_objects) do
-        object:draw_debug()
+    local items = self.world:getItems()
+    for _, item in ipairs(items) do
+        local x, y, width, height = self.world:getRect(item)
+        love.graphics.rectangle("line", x, y, width, height)
     end
+
+    -- self.player:draw_debug()
+    -- self.owner:draw_debug()
+
+    -- for _, object in ipairs(self.throwable_objects) do
+    --     object:draw_debug()
+    -- end
 
     
 end

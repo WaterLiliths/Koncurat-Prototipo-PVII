@@ -38,6 +38,8 @@ function  PlayerWalking:update(dt)
 
     self.player.hitbox_x = self.player.x - self.player.origin_x
     self.player.hitbox_y = self.player.y - self.player.origin_y
+    self.player.world:update(self.player, self.player.hitbox_x, self.player.hitbox_y,
+    self.player.width, self.player.height)
 
     self.player.animation:update(dt)
 

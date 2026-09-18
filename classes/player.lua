@@ -32,7 +32,7 @@ function Player:load_animations()
     self.animations.cute = create_animation(52, 4, 6, false)
 end
 
-function Player:init(pos_x, pos_y)
+function Player:init(pos_x, pos_y, world)
 
     self.x = pos_x
     self.y = pos_y
@@ -51,6 +51,8 @@ function Player:init(pos_x, pos_y)
 
     self.interaction_requested = false
 
+    self.world = world
+
     self:load_animations()
     self.meow_sound = Sound("sound/cat_meowing.mp3") 
 
@@ -61,6 +63,7 @@ function Player:init(pos_x, pos_y)
     }
 
     self.PlayerStateMachine:change_state('idle')
+    self.world:add(self, self.hitbox_x, self.hitbox_y, self.width, self.height)
 
 
 end

@@ -6,7 +6,7 @@ local Class = require("libraries.class")
 local ThrowableObject = Class() -- Lo creo como tabla local para protegerlo
 
 -- ============= INICIALIZACION ==============
-function ThrowableObject:init(pos_x, pos_y)
+function ThrowableObject:init(pos_x, pos_y, world)
     self.x = pos_x
     self.y = pos_y
 
@@ -24,6 +24,11 @@ function ThrowableObject:init(pos_x, pos_y)
     self.break_sound = Sound("sound/object_breaking.mp3")
 
     self.is_destroyed = false
+
+    self.world = world
+
+    self.world:add(self, self.hitbox_x, self.hitbox_y, self.width, self.height)
+
 
 end
 
