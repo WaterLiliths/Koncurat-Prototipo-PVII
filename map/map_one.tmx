@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="32" tileheight="32" infinite="0" nextlayerid="11" nextobjectid="72">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="32" tileheight="32" infinite="0" nextlayerid="11" nextobjectid="73">
  <editorsettings>
   <export target="map_one.lua" format="lua"/>
  </editorsettings>
@@ -251,9 +251,6 @@
   <object id="47" x="419.068" y="384.25" width="19.8637" height="22"/>
   <object id="48" x="420.068" y="427" width="24.7728" height="34.9091"/>
   <object id="49" x="566.401" y="468.061" width="69.4395" height="26.2424"/>
-  <object id="50" x="549.178" y="478.201" width="17.5574" height="13.9064" rotation="35.4727">
-   <capsule/>
-  </object>
   <object id="51" x="592" y="512.667" width="15.3333" height="18"/>
   <object id="52" x="648.333" y="504.333" width="46.6666" height="22.3333"/>
   <object id="53" x="416" y="596.167" width="31.6666" height="29.3333"/>
@@ -273,5 +270,6 @@
   <object id="68" x="836.864" y="504.002" width="21.9394" height="31.9961"/>
   <object id="69" x="902.03" y="560.335" width="25.2727" height="42.9961"/>
   <object id="70" x="924.364" y="551.169" width="4.2727" height="42.9961"/>
+  <object id="72" x="544.333" y="480.333" width="15" height="17"/>
  </objectgroup>
 </map>

@@ -46,6 +46,10 @@ function Player:init(pos_x, pos_y, world)
     self.hitbox_x = self.x - self.width
     self.hitbox_y = self.y - self.height
 
+    -- Actualizo la posicion del personaje para que se corresponda con la del hitbox
+    self.x = self.hitbox_x + self.origin_x
+    self.y = self.hitbox_y + self.origin_y
+
     self.speed = 100
     self.moving = false
     self.type = "player"
