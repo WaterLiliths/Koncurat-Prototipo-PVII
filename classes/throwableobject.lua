@@ -19,6 +19,8 @@ function ThrowableObject:init(pos_x, pos_y, world)
     self.hitbox_x = self.x - self.width / 2
     self.hitbox_y = self.y - self.height / 2
 
+    self.type = "throwable"
+
     self.sprite = love.graphics.newImage("assets/plant.png")
 
     self.break_sound = Sound("sound/object_breaking.mp3")

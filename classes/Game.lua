@@ -24,7 +24,18 @@ local Game = Class()
 
 function Game:init()
 
+    -- MAPA
+    self.map = STI("map/map_one.lua")
+
+    -- MUNDO
     self.world = Bump.newWorld(32)
+
+    if self.map.layers['wall_colisions'] then
+        for _, object in ipairs(self.map.layers['wall_colisions'].objects) do
+            object.type = "wall"
+            self.world:add(object, object.x, object.y, object.width, object.height)
+        end
+    end
     
     self.player = Player(160, 90, self.world)
     self.owner = Owner(100, 200, self.world)
@@ -42,9 +53,7 @@ function Game:init()
 
     self.debug = false
     
-    -- MAPA
-    self.map = STI("map/map_one.lua")
-    
+   
     -- CAMARA
     self.camera_center_x = SCREEN_WIDTH * 0.5
     self.camera_center_y = SCREEN_HEIGHT * 0.5

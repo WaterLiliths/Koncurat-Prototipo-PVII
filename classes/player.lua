@@ -48,6 +48,7 @@ function Player:init(pos_x, pos_y, world)
 
     self.speed = 100
     self.moving = false
+    self.type = "player"
 
     self.interaction_requested = false
 

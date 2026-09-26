@@ -31,6 +31,8 @@ function Owner:init(pos_x, pos_y, world)
     self.hitbox_x = self.x - self.width
     self.hitbox_y = self.y - self.height
 
+    self.type = "owner"
+
     self.world = world
 
     self:load_animations()
