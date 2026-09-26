@@ -62,7 +62,10 @@ function GamePlaying:render()
     self.game.map:drawLayer(self.game.map.layers["grass"])
     self.game.map:drawLayer(self.game.map.layers["floor"])
     self.game.map:drawLayer(self.game.map.layers["walls"])
+    self.game.map:drawLayer(self.game.map.layers["rugs"])
+    self.game.map:drawLayer(self.game.map.layers["furniture"])
     self.game.map:drawLayer(self.game.map.layers["divisions"])
+
     
     for _, object in ipairs(self.game.throwable_objects) do
         object:draw()

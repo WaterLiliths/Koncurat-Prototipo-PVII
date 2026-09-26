@@ -7,7 +7,7 @@ local PlayerWalking = Class{__includes = State}
 
 -- Filtra las reacciones de colision con Bump al definir con qué objeto se colisionó
 local function filter(item, other)
-    if other.type == "wall" then
+    if other.type == "wall" or other.type == "furniture" then
         return "slide"
     end
 

@@ -37,8 +37,8 @@ function Player:init(pos_x, pos_y, world)
     self.x = pos_x
     self.y = pos_y
     
-    self.width = 32 -- alto del sprite
-    self.height = 32 -- alto del sprite
+    self.width = 25 -- alto del sprite
+    self.height = 25 -- alto del sprite
 
     self.origin_x = self.width / 2
     self.origin_y = self.height / 2

@@ -36,8 +36,15 @@ function Game:init()
             self.world:add(object, object.x, object.y, object.width, object.height)
         end
     end
+
+    if self.map.layers['furniture_colisions'] then
+        for _, object in ipairs(self.map.layers['furniture_colisions'].objects) do
+            object.type = "furniture"
+            self.world:add(object, object.x, object.y, object.width, object.height)
+        end
+    end
     
-    self.player = Player(160, 90, self.world)
+    self.player = Player(160, 590, self.world)
     self.owner = Owner(100, 200, self.world)
 
     self.throwable_objects = {}
@@ -170,7 +177,7 @@ function Game:restart()
 
     self.world = Bump.newWorld(32)
     
-    self.player = Player(160, 90, self.world)
+    self.player = Player(160, 590, self.world)
     self.owner = Owner(100, 200, self.world)
 
     self.throwable_objects = {}
