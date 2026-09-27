@@ -22,7 +22,8 @@ function GamePlaying:update(dt)
 
     self.game.player:update(dt)
 
-    self.game.main_camera:lookAt(self.game.player.x, self.game.player.y)
+    self.game.main_camera:lookAt(
+    math.floor(self.game.player.x), math.floor(self.game.player.y))
 
     -- Control de los límites de la cámara
     if self.game.main_camera.x < self.game.camera_center_x then
@@ -62,6 +63,7 @@ function GamePlaying:render()
     self.game.map:drawLayer(self.game.map.layers["grass"])
     self.game.map:drawLayer(self.game.map.layers["floor"])
     self.game.map:drawLayer(self.game.map.layers["walls"])
+    self.game.map:drawLayer(self.game.map.layers["doors"])
     self.game.map:drawLayer(self.game.map.layers["rugs"])
     self.game.map:drawLayer(self.game.map.layers["furniture"])
     self.game.map:drawLayer(self.game.map.layers["divisions"])
@@ -82,16 +84,26 @@ function GamePlaying:render()
 end
 
 function GamePlaying:render_ui()
+
+    love.graphics.setFont(self.game.main_font)
+
+    love.graphics.setColor(0, 0, 0)
+    
     love.graphics.print("Ternura", 10, 10)
     self.game:draw_bar(10, 30, 200, 15, self.game.owner.tenderness, 100,
             self.game.tenderness_min, self.game.tenderness_max)
+    
+    love.graphics.setColor(0, 0, 0)
     love.graphics.print("Hartazgo", 220, 10)
     self.game:draw_bar(220, 30, 200, 15, self.game.owner.annoyment, 100,
             self.game.annoyment_min, self.game.annoyment_max)
-        
+
+    love.graphics.setColor(0, 0, 0)
     love.graphics.print("Presiona las flechas para moverte/'E' para interactuar", 10, 50)
     love.graphics.print("Alcanza nos niveles de ternura y hartazgo necesarios para que tu dueña te de de comer, otra vez",
         10, 70)
+
+    love.graphics.setColor(1.0, 1.0, 1.0)
 end
 
 function GamePlaying:exit()

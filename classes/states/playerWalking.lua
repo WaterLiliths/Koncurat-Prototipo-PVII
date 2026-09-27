@@ -7,7 +7,9 @@ local PlayerWalking = Class{__includes = State}
 
 -- Filtra las reacciones de colision con Bump al definir con qué objeto se colisionó
 local function filter(item, other)
-    if other.type == "wall" or other.type == "furniture" then
+    if other.type == "wall" 
+    or other.type == "furniture"
+    or other.type == "door" then
         return "slide"
     end
 
@@ -78,7 +80,7 @@ function  PlayerWalking:update(dt)
 end
 
 function PlayerWalking:render()
-    self.player.animation:render(self.player.x, self.player.y)
+    self.player.animation:render(math.floor(self.player.x), math.floor(self.player.y))
 end
 
 function PlayerWalking:exit()
