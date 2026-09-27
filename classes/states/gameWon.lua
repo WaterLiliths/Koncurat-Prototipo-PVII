@@ -26,9 +26,16 @@ function GameWon:render()
 end
 
 function GameWon:render_ui()
-    love.graphics.print("HAS GANADO!", 125, 70)
-    love.graphics.print("Conseguiste la quinta porción de comida de la mañana", 125, 90)
-    love.graphics.print("Presiona R para reiniciar", 125, 110)
+    love.graphics.setFont(self.game.title_font)
+    love.graphics.setColor(0.30, 0.65, 0.35)
+    love.graphics.printf("¡HAS GANADO!", 0, 70, love.graphics.getWidth(), "center")
+    
+    love.graphics.setFont(self.game.main_font_titles)
+    love.graphics.setColor(1.0, 1.0, 1.0)
+    love.graphics.printf("Conseguiste la quinta porción de comida de la mañana", 0,
+    150, love.graphics.getWidth(), "center")
+    love.graphics.printf("Presiona R para reiniciar", 0,
+    190, love.graphics.getWidth(), "center")
 end
 
 function GameWon:exit()

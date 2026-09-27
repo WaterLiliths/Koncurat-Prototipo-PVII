@@ -30,7 +30,7 @@ function  PlayerIdle:update(dt)
 end
 
 function PlayerIdle:render()
-    self.player.animation:render(self.player.x, self.player.y)
+    self.player.animation:render(math.floor(self.player.x), math.floor(self.player.y))
 end
 
 function PlayerIdle:exit()

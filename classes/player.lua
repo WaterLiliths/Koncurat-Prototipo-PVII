@@ -32,16 +32,31 @@ function Player:load_animations()
     self.animations.cute = create_animation(52, 4, 6, false)
 end
 
-function Player:init(pos_x, pos_y)
+function Player:init(pos_x, pos_y, world)
 
     self.x = pos_x
     self.y = pos_y
-    self.width = 32 -- alto del sprite
-    self.height = 32 -- alto del sprite
+    
+    self.width = 25 -- alto del sprite
+    self.height = 25 -- alto del sprite
+
+    self.origin_x = self.width / 2
+    self.origin_y = self.height / 2
+
+    self.hitbox_x = self.x - self.width
+    self.hitbox_y = self.y - self.height
+
+    -- Actualizo la posicion del personaje para que se corresponda con la del hitbox
+    self.x = self.hitbox_x + self.origin_x
+    self.y = self.hitbox_y + self.origin_y
+
     self.speed = 100
     self.moving = false
+    self.type = "player"
 
     self.interaction_requested = false
+
+    self.world = world
 
     self:load_animations()
     self.meow_sound = Sound("sound/cat_meowing.mp3") 
@@ -53,6 +68,7 @@ function Player:init(pos_x, pos_y)
     }
 
     self.PlayerStateMachine:change_state('idle')
+    self.world:add(self, self.hitbox_x, self.hitbox_y, self.width, self.height)
 
 
 end
@@ -87,6 +103,16 @@ end
 function Player:draw()
 
     self.PlayerStateMachine:render()
+
+end
+
+function Player:draw_debug()
+
+    love.graphics.setColor(0,1,0)
+    love.graphics.circle("fill", self.x, self.y, 1)
+    love.graphics.rectangle("line", self.hitbox_x, self.hitbox_y, self.width, self.height)
+    love.graphics.setColor(1,1,1)
+
 end
 
 return Player
