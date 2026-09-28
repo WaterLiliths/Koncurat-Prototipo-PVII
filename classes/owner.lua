@@ -17,13 +17,23 @@ function Owner:load_animations()
     self.animations.walk_left = Animation("assets/walk_Left_Down.png", 0, 8, 48, 64, 7, false, true)
 end
 
-function Owner:init(pos_x, pos_y)
+function Owner:init(pos_x, pos_y, world)
     self.x = pos_x
     self.y = pos_y
-    self. speed = 50
+    self.speed = 50
     self.radius = 10
     self.width = 30
     self.height = 30
+
+    self.origin_x = self.width / 2
+    self.origin_y = self.height / 2
+
+    self.hitbox_x = self.x - self.width
+    self.hitbox_y = self.y - self.height
+
+    self.type = "owner"
+
+    self.world = world
 
     self:load_animations()
 
@@ -31,6 +41,9 @@ function Owner:init(pos_x, pos_y)
 
     self.annoyment = 0 --Barra de hartazgo
     self.tenderness = 0 --Barra de ternura
+
+    self.world:add(self, self.hitbox_x, self.hitbox_y, self.width, self.height)
+
 
 end
 
@@ -83,6 +96,10 @@ function Owner:update (dt)
 
     self.x = self.x + self.speed * dt
 
+    self.hitbox_x = self.x - self.origin_x
+    self.hitbox_y = self.y - self.origin_y
+    self.world:update(self, self.hitbox_x, self.hitbox_y, self.width, self.height)
+
     self.animation:update(dt)
 
 end
@@ -91,6 +108,15 @@ end
 
 function Owner:draw ()
     self.animation:render(self.x, self.y)
+end
+
+function Owner:draw_debug()
+
+    love.graphics.setColor(0,1,0)
+    love.graphics.circle("fill", self.x, self.y, 1)
+    love.graphics.rectangle("line", self.hitbox_x, self.hitbox_y, self.width, self.height)
+    love.graphics.setColor(1,1,1)
+
 end
 
 return Owner

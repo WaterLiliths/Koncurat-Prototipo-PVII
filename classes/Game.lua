@@ -5,7 +5,9 @@ local Class = require("libraries.class")
 local Player = require("classes.player")
 local Owner = require("classes.owner")
 local ThrowableObject = require("classes.throwableobject")
-local sti = require("libraries.sti")
+local STI = require("libraries.sti")
+local Camera = require("libraries.camera")
+local Bump = require("libraries.bump")
 
 -- FSM requisitos
 local StateMachine = require("classes.states.stateMachine")
@@ -20,24 +22,59 @@ local Game = Class()
 
 -- ============ INICIALIZACION ==================
 
-function Game:init()
+function Game:init()  --Esta función y Game:restart() se refactorizarán luego para evtiar código duplicado
 
-    self.player = Player(160, 90)
-    self.owner = Owner(100, 200)
+    -- MAPA
+    self.map = STI("map/map_one.lua")
+
+    -- MUNDO
+    self.world = Bump.newWorld(32)
+
+    if self.map.layers['wall_colisions'] then
+        for _, object in ipairs(self.map.layers['wall_colisions'].objects) do
+            object.type = "wall"
+            self.world:add(object, object.x, object.y, object.width, object.height)
+        end
+    end
+
+    if self.map.layers['doors_colisions'] then
+        for _, object in ipairs(self.map.layers['doors_colisions'].objects) do
+            object.type = "door"
+            self.world:add(object, object.x, object.y, object.width, object.height)
+        end
+    end
+
+    if self.map.layers['furniture_colisions'] then
+        for _, object in ipairs(self.map.layers['furniture_colisions'].objects) do
+            object.type = "furniture"
+            self.world:add(object, object.x, object.y, object.width, object.height)
+        end
+    end
+    
+    self.player = Player(160, 590, self.world)
+    self.owner = Owner(100, 600, self.world)
 
     self.throwable_objects = {}
 
-    table.insert(self.throwable_objects, ThrowableObject(50, 70))
-    table.insert(self.throwable_objects, ThrowableObject(200, 50))
-    table.insert(self.throwable_objects, ThrowableObject(250, 120))
-    table.insert(self.throwable_objects, ThrowableObject(300, 250))
-    table.insert(self.throwable_objects, ThrowableObject(350, 100))
-    table.insert(self.throwable_objects, ThrowableObject(20, 220))
-    table.insert(self.throwable_objects, ThrowableObject(150, 260))
-    table.insert(self.throwable_objects, ThrowableObject(50, 100))
+    if self.map.layers['throwable'] then
+        for _, spawn_point in ipairs(self.map.layers['throwable'].objects) do
+            table.insert(self.throwable_objects,
+            ThrowableObject(spawn_point.x, spawn_point.y, self.world))
+        end
+        
+    end
 
-    self.map = nil
-    self.map = sti("map/map_one.lua")
+    self.title_font = love.graphics.newFont('assets/fonts/PixelGamer-Regular.otf', 60)
+    self.main_font_titles = love.graphics.newFont('assets/fonts/JAi_____.TTF', 20)
+    self.main_font = love.graphics.newFont('assets/fonts/JAi_____.TTF', 13)
+
+    self.debug = false
+    
+   
+    -- CAMARA
+    self.camera_center_x = SCREEN_WIDTH * 0.5
+    self.camera_center_y = SCREEN_HEIGHT * 0.5
+    self.main_camera = Camera()
 
     self.annoyment_min = 40
     self.tenderness_min = 60
@@ -58,12 +95,16 @@ end
 
 -- ============ LOGICA ============
 
+--- Checkea si hay colision entre los objetos enviados por parametro
 function Game:check_collision(a, b)
-        return -- devuelve true si un objeto está "dentro" de otro
-        a.x < b.x + b.width and
-        a.x + a.width > b.x and
-        a.y < b.y + b.height and
-        a.y + a.height > b.y
+    local collisons = self.world:queryRect(a.hitbox_x, a.hitbox_y,
+    a.width, a.height) --guarda las colisiones con a
+
+    for _, item in ipairs(collisons) do
+        if item == b then
+            return true
+        end
+    end
 end
 
 function Game:interact()
@@ -72,17 +113,21 @@ function Game:interact()
         return
     end
 
+    local interacted = false
+
     for _, object in ipairs(self.throwable_objects) do
         if self:check_collision(self.player, object) then
             object:throw()
             self.player:set_interaction("throw")
             self.owner:change_annoyment(15)
             self.owner:change_tenderness(-10)
+
+            interacted = true
             break
         end
     end
 
-    if self:check_collision(self.player, self.owner) then
+    if not interacted and self:check_collision(self.player, self.owner) then
         self.player:set_interaction("cute")
         self.owner:change_tenderness(10)
         self.owner:change_annoyment(-5)
@@ -103,6 +148,10 @@ function Game:remove_destroyed_objects()
 end
 
 function Game:keypressed(key)
+
+    if key == "f1" then
+        self.debug = not self.debug
+    end
 
     self.GameStateMachine:keypressed(key)
 
@@ -140,19 +189,43 @@ end
 
 function Game:restart()
 
-    self.player = Player(160, 90)
-    self.owner = Owner(100, 120)
+    self.world = Bump.newWorld(32)
+    
+    if self.map.layers['wall_colisions'] then
+        for _, object in ipairs(self.map.layers['wall_colisions'].objects) do
+            object.type = "wall"
+            self.world:add(object, object.x, object.y, object.width, object.height)
+        end
+    end
+
+    if self.map.layers['doors_colisions'] then
+        for _, object in ipairs(self.map.layers['doors_colisions'].objects) do
+            object.type = "door"
+            self.world:add(object, object.x, object.y, object.width, object.height)
+        end
+    end
+
+    if self.map.layers['furniture_colisions'] then
+        for _, object in ipairs(self.map.layers['furniture_colisions'].objects) do
+            object.type = "furniture"
+            self.world:add(object, object.x, object.y, object.width, object.height)
+        end
+    end
+    
+    self.player = Player(160, 590, self.world)
+    self.owner = Owner(100, 600, self.world)
 
     self.throwable_objects = {}
 
-    table.insert(self.throwable_objects, ThrowableObject(50, 70))
-    table.insert(self.throwable_objects, ThrowableObject(200, 50))
-    table.insert(self.throwable_objects, ThrowableObject(250, 120))
-    table.insert(self.throwable_objects, ThrowableObject(300, 250))
-    table.insert(self.throwable_objects, ThrowableObject(350, 100))
-    table.insert(self.throwable_objects, ThrowableObject(20, 220))
-    table.insert(self.throwable_objects, ThrowableObject(150, 260))
-    table.insert(self.throwable_objects, ThrowableObject(50, 100))
+    if self.map.layers['throwable'] then
+        for _, spawn_point in ipairs(self.map.layers['throwable'].objects) do
+            table.insert(self.throwable_objects,
+            ThrowableObject(spawn_point.x, spawn_point.y, self.world))
+        end
+        
+    end
+
+    self.debug = false
 
     self.GameStateMachine:change_state("playing")
 
@@ -195,6 +268,20 @@ function Game:draw_ui()
 
     self.GameStateMachine:render_ui()
 
+end
+
+function Game:draw_debug()
+
+    if not self.debug then
+        return
+    end
+
+    local items = self.world:getItems()
+    for _, item in ipairs(items) do
+        local x, y, width, height = self.world:getRect(item)
+        love.graphics.rectangle("line", x, y, width, height)
+    end
+    
 end
 
 return Game
