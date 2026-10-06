@@ -5,6 +5,7 @@ local Class = require("libraries.class")
 local Player = require("classes.player")
 local Owner = require("classes.owner")
 local ThrowableObject = require("classes.throwableobject")
+local HUD = require("classes.hud")
 local STI = require("libraries.sti")
 local Camera = require("libraries.camera")
 local Bump = require("libraries.bump")
@@ -50,7 +51,7 @@ function Game:init()  --Esta función y Game:restart() se refactorizarán luego 
             self.world:add(object, object.x, object.y, object.width, object.height)
         end
     end
-    
+
     self.player = Player(160, 590, self.world)
     self.owner = Owner(100, 600, self.world)
 
@@ -64,12 +65,7 @@ function Game:init()  --Esta función y Game:restart() se refactorizarán luego 
         
     end
 
-    self.title_font = love.graphics.newFont('assets/fonts/PixelGamer-Regular.otf', 60)
-    self.main_font_titles = love.graphics.newFont('assets/fonts/JAi_____.TTF', 20)
-    self.main_font = love.graphics.newFont('assets/fonts/JAi_____.TTF', 13)
-
     self.debug = false
-    
    
     -- CAMARA
     self.camera_center_x = SCREEN_WIDTH * 0.5
@@ -81,6 +77,11 @@ function Game:init()  --Esta función y Game:restart() se refactorizarán luego 
 
     self.annoyment_max = 60
     self.tenderness_max = 80
+
+
+    self.hud = HUD(self.world, self.owner, self.tenderness_min, self.tenderness_max,
+        self.annoyment_min, self.annoyment_max)
+
 
     self.GameStateMachine = StateMachine{
         ['main_menu'] = function () return GameMainMenu(self) end,
@@ -238,32 +239,6 @@ function Game:draw ()
     self.GameStateMachine:render()
 end
 
---- Dibuja barras para la ui que actualizan el valor
-function Game:draw_bar(x, y, width, height, value, max_value, target_min, target_max)
-    
-    -- Fondo de la barra
-    love.graphics.setColor(0.3, 0.3, 0.3)
-    love.graphics.rectangle("fill", x, y, width, height)
-
-    -- Rango a alcanzar para ganar
-    local target_x = x + width * (target_min / max_value)
-    local target_width = width * ((target_max - target_min) / max_value)
-
-    love.graphics.setColor(0.7, 0.7, 0.7)
-    love.graphics.rectangle("fill", target_x, y, target_width, height)
-
-    -- Estado actual de la barra
-    local fill_width = width * (value / max_value)
-
-    love.graphics.setColor(1, 1, 1)
-
-    love.graphics.rectangle("fill", x, y, fill_width, height)
-
-    love.graphics.setColor(1, 1, 1) -- Vuelvo al blanco para no alterar el resto del dibujado
-
-
-end
-
 function Game:draw_ui()
 
     self.GameStateMachine:render_ui()
@@ -276,11 +251,7 @@ function Game:draw_debug()
         return
     end
 
-    local items = self.world:getItems()
-    for _, item in ipairs(items) do
-        local x, y, width, height = self.world:getRect(item)
-        love.graphics.rectangle("line", x, y, width, height)
-    end
+    self.hud:draw_debug()
     
 end
 

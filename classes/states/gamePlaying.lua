@@ -84,26 +84,7 @@ function GamePlaying:render()
 end
 
 function GamePlaying:render_ui()
-
-    love.graphics.setFont(self.game.main_font)
-
-    love.graphics.setColor(0, 0, 0)
-    
-    love.graphics.print("Ternura", 10, 10)
-    self.game:draw_bar(10, 30, 200, 15, self.game.owner.tenderness, 100,
-            self.game.tenderness_min, self.game.tenderness_max)
-    
-    love.graphics.setColor(0, 0, 0)
-    love.graphics.print("Hartazgo", 220, 10)
-    self.game:draw_bar(220, 30, 200, 15, self.game.owner.annoyment, 100,
-            self.game.annoyment_min, self.game.annoyment_max)
-
-    love.graphics.setColor(0, 0, 0)
-    love.graphics.print("Presiona las flechas para moverte/'E' para interactuar", 10, 50)
-    love.graphics.print("Alcanza nos niveles de ternura y hartazgo necesarios para que tu dueña te de de comer, otra vez",
-        10, 70)
-
-    love.graphics.setColor(1.0, 1.0, 1.0)
+    self.game.hud:render_ui()
 end
 
 function GamePlaying:exit()
