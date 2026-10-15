@@ -1,13 +1,16 @@
 -- ============ REQUIERE ==================
 local Class = require("libraries.class")
+local Signal = require("libraries.signal")
 
 -- ============ CLASE ==================
 local HUD = Class{}
 
 -- ============ Inicialización ==================
-function HUD:init(world, owner, tenderness_min, tenderness_max, annoyment_min, annoyment_max)
-    self.world = world
-    self.owner = owner
+function HUD:init(tenderness_min, tenderness_max, annoyment_min, annoyment_max)
+    self.tenderness = 0
+    self.annoyment = 0
+
+    self.debug = false
 
     self.tenderness_min = tenderness_min
     self.tenderness_max = tenderness_max
@@ -17,6 +20,19 @@ function HUD:init(world, owner, tenderness_min, tenderness_max, annoyment_min, a
     self.title_font = love.graphics.newFont('assets/fonts/PixelGamer-Regular.otf', 60)
     self.main_font_titles = love.graphics.newFont('assets/fonts/JAi_____.TTF', 20)
     self.main_font = love.graphics.newFont('assets/fonts/JAi_____.TTF', 13)
+
+    --SEÑALES
+    Signal.register("debug_mode", function ()
+        self.debug = not self.debug
+    end)
+    Signal.register("annoyment_changed", function (value)
+        self.annoyment = value        
+    end)
+    Signal.register("tenderness_changed", function (value)
+        self.tenderness = value
+        
+    end)
+
 end
 
 function HUD:render_ui()
@@ -25,12 +41,12 @@ function HUD:render_ui()
     love.graphics.setColor(0, 0, 0)
     
     love.graphics.print("Ternura", 10, 10)
-    self:draw_bar(10, 30, 200, 15, self.owner.tenderness, 100,
+    self:draw_bar(10, 30, 200, 15, self.tenderness, 100,
             self.tenderness_min, self.tenderness_max)
     
     love.graphics.setColor(0, 0, 0)
     love.graphics.print("Hartazgo", 220, 10)
-    self:draw_bar(220, 30, 200, 15, self.owner.annoyment, 100,
+    self:draw_bar(220, 30, 200, 15, self.annoyment, 100,
             self.annoyment_min, self.annoyment_max)
 
     love.graphics.setColor(0, 0, 0)
@@ -77,10 +93,10 @@ function HUD:render_game_over()
     love.graphics.setColor(1.0, 1.0, 1.0)
     love.graphics.printf("Presiona R para reiniciar", 0, 190, love.graphics.getWidth(), "center")
 
-    if self.owner.annoyment >= 100 then
+    if self.annoyment >= 100 then
         love.graphics.printf("¡Qué hartante! Tu dueña te ha encerrado en la habitación", 0,
         150, love.graphics.getWidth(), "center") 
-    elseif self.owner.tenderness >= 100 then
+    elseif self.tenderness >= 100 then
         love.graphics.printf("¡Exceso de ternura! Tu dueña te ha atrapado en un abrazo no solicitado", 0,
         150, love.graphics.getWidth(), "center")
 
@@ -110,12 +126,11 @@ function HUD:draw_bar(x, y, width, height, value, max_value, target_min, target_
     love.graphics.setColor(1, 1, 1) -- Vuelvo al blanco para no alterar el resto del dibujado
 end
 
-function HUD:draw_debug()
-    local items = self.world:getItems()
-    
+function HUD:draw_debug(items)
+    if not self.debug then return end
+  
     for _, item in ipairs(items) do
-        local x, y, width, height = self.world:getRect(item)
-        love.graphics.rectangle("line", x, y, width, height)
+        love.graphics.rectangle("line", item.x, item.y, item.width, item.height)
     end
 end
 

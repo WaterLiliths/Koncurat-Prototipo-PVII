@@ -9,6 +9,8 @@ local HUD = require("classes.hud")
 local STI = require("libraries.sti")
 local Camera = require("libraries.camera")
 local Bump = require("libraries.bump")
+local Signal = require("libraries.signal")
+local Timer = require("libraries.timer")
 
 -- FSM requisitos
 local StateMachine = require("classes.states.stateMachine")
@@ -53,7 +55,10 @@ function Game:init()  --Esta función y Game:restart() se refactorizarán luego 
     end
 
     self.player = Player(160, 590, self.world)
+
+
     self.owner = Owner(100, 600, self.world)
+    self.owner_timer = Timer.new()
 
     self.throwable_objects = {}
 
@@ -65,8 +70,7 @@ function Game:init()  --Esta función y Game:restart() se refactorizarán luego 
         
     end
 
-    self.debug = false
-   
+ 
     -- CAMARA
     self.camera_center_x = SCREEN_WIDTH * 0.5
     self.camera_center_y = SCREEN_HEIGHT * 0.5
@@ -79,7 +83,7 @@ function Game:init()  --Esta función y Game:restart() se refactorizarán luego 
     self.tenderness_max = 80
 
 
-    self.hud = HUD(self.world, self.owner, self.tenderness_min, self.tenderness_max,
+    self.hud = HUD(self.tenderness_min, self.tenderness_max,
         self.annoyment_min, self.annoyment_max)
 
 
@@ -108,6 +112,25 @@ function Game:check_collision(a, b)
     end
 end
 
+-- Para dibujar el modo debug
+function Game:get_collision_rectangles()
+    local rectangles = {}
+
+    for _, item in ipairs(self.world:getItems()) do
+        local x, y, width, height = self.world:getRect(item)
+
+        table.insert(rectangles, {
+            x = x,
+            y = y,
+            width = width,
+            height = height
+        })
+    end
+
+    return rectangles
+end
+
+
 function Game:interact()
 
     if not self.player.interaction_requested then
@@ -120,8 +143,8 @@ function Game:interact()
         if self:check_collision(self.player, object) then
             object:throw()
             self.player:set_interaction("throw")
-            self.owner:change_annoyment(15)
-            self.owner:change_tenderness(-10)
+
+            Signal.emit("object_thrown")
 
             interacted = true
             break
@@ -130,8 +153,9 @@ function Game:interact()
 
     if not interacted and self:check_collision(self.player, self.owner) then
         self.player:set_interaction("cute")
-        self.owner:change_tenderness(10)
-        self.owner:change_annoyment(-5)
+
+        Signal.emit("cute_interaction")
+
         self.player.meow_sound:play()
         
     end
@@ -151,12 +175,20 @@ end
 function Game:keypressed(key)
 
     if key == "f1" then
-        self.debug = not self.debug
+        Signal.emit("debug_mode")
     end
 
     self.GameStateMachine:keypressed(key)
 
     self.player:keypressed(key)
+end
+
+function Game:start_owner_timers()
+    self.owner_timer:clear()
+
+    self.owner_timer:every(2, function ()
+        Signal.emit("time_passed")
+    end)
 end
 
 function Game:check_win_condition()
@@ -214,7 +246,7 @@ function Game:restart()
     end
     
     self.player = Player(160, 590, self.world)
-    self.owner = Owner(100, 600, self.world)
+    self.owner:reset(100, 600)
 
     self.throwable_objects = {}
 
@@ -243,16 +275,6 @@ function Game:draw_ui()
 
     self.GameStateMachine:render_ui()
 
-end
-
-function Game:draw_debug()
-
-    if not self.debug then
-        return
-    end
-
-    self.hud:draw_debug()
-    
 end
 
 return Game

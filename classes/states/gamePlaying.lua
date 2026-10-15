@@ -13,7 +13,7 @@ function GamePlaying:init(game)
 end
 
 function GamePlaying:enter()
-    
+    self.game:start_owner_timers()
 end
 
 function GamePlaying:update(dt)
@@ -43,6 +43,7 @@ function GamePlaying:update(dt)
     end
 
     self.game.owner:update(dt)
+    self.game.owner_timer:update(dt)
 
     self.game:remove_destroyed_objects()
 
@@ -76,7 +77,8 @@ function GamePlaying:render()
     self.game.owner:draw()
     self.game.player:draw()
 
-    self.game:draw_debug()
+    local rectangles = self.game:get_collision_rectangles()
+    self.game.hud:draw_debug(rectangles)
 
     self.game.main_camera:detach()
 
@@ -85,10 +87,11 @@ end
 
 function GamePlaying:render_ui()
     self.game.hud:render_ui()
+
 end
 
 function GamePlaying:exit()
-    
+    self.game.owner_timer:clear()
 end
 
 return GamePlaying
