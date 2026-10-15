@@ -25,52 +25,57 @@ local Game = Class()
 
 -- ============ INICIALIZACION ==================
 
-function Game:init()  --Esta función y Game:restart() se refactorizarán luego para evtiar código duplicado
-
-    -- MAPA
-    self.map = STI("map/map_one.lua")
-
+function Game:create_game()
     -- MUNDO
     self.world = Bump.newWorld(32)
 
-    if self.map.layers['wall_colisions'] then
-        for _, object in ipairs(self.map.layers['wall_colisions'].objects) do
-            object.type = "wall"
-            self.world:add(object, object.x, object.y, object.width, object.height)
+    -- COLISIONES DEL MAPA
+    local colision_layers = {
+        wall_colisions = "wall",
+        doors_colisions = "door",
+        furniture_colisions = "furniture"
+    } 
+
+    for layer_name, object_type in pairs(colision_layers) do
+        local layer = self.map.layers[layer_name]
+        if layer then
+            for _, object in ipairs(layer.objects) do
+                object.type = object_type
+
+                self.world:add(object, object.x, object.y,
+            object.width, object.height)
+            end
         end
     end
 
-    if self.map.layers['doors_colisions'] then
-        for _, object in ipairs(self.map.layers['doors_colisions'].objects) do
-            object.type = "door"
-            self.world:add(object, object.x, object.y, object.width, object.height)
-        end
-    end
-
-    if self.map.layers['furniture_colisions'] then
-        for _, object in ipairs(self.map.layers['furniture_colisions'].objects) do
-            object.type = "furniture"
-            self.world:add(object, object.x, object.y, object.width, object.height)
-        end
-    end
-
+    -- PLAYER
     self.player = Player(160, 590, self.world)
 
-
-    self.owner = Owner(100, 600, self.world)
-    self.owner_timer = Timer.new()
-
+    -- OBJETOS
     self.throwable_objects = {}
 
-    if self.map.layers['throwable'] then
-        for _, spawn_point in ipairs(self.map.layers['throwable'].objects) do
+    local throwable_layer = self.map.layers['throwable']
+
+    if throwable_layer then
+        for _, spawn_point in ipairs(throwable_layer.objects) do
             table.insert(self.throwable_objects,
             ThrowableObject(spawn_point.x, spawn_point.y, self.world))
         end
         
     end
+    
+end
 
- 
+function Game:init() 
+
+    -- MAPA
+    self.map = STI("map/map_one.lua")
+
+    self:create_game()
+
+    self.owner = Owner(100, 600, self.world)
+    self.owner_timer = Timer.new()
+
     -- CAMARA
     self.camera_center_x = SCREEN_WIDTH * 0.5
     self.camera_center_y = SCREEN_HEIGHT * 0.5
@@ -82,11 +87,11 @@ function Game:init()  --Esta función y Game:restart() se refactorizarán luego 
     self.annoyment_max = 60
     self.tenderness_max = 80
 
-
+    -- HUD
     self.hud = HUD(self.tenderness_min, self.tenderness_max,
         self.annoyment_min, self.annoyment_max)
-
-
+    
+    -- GAME STATE MACHINE
     self.GameStateMachine = StateMachine{
         ['main_menu'] = function () return GameMainMenu(self) end,
         ['playing'] = function () return GamePlaying(self) end,
@@ -223,42 +228,10 @@ end
 function Game:restart()
 
     self.world = Bump.newWorld(32)
+
+    self:create_game()
     
-    if self.map.layers['wall_colisions'] then
-        for _, object in ipairs(self.map.layers['wall_colisions'].objects) do
-            object.type = "wall"
-            self.world:add(object, object.x, object.y, object.width, object.height)
-        end
-    end
-
-    if self.map.layers['doors_colisions'] then
-        for _, object in ipairs(self.map.layers['doors_colisions'].objects) do
-            object.type = "door"
-            self.world:add(object, object.x, object.y, object.width, object.height)
-        end
-    end
-
-    if self.map.layers['furniture_colisions'] then
-        for _, object in ipairs(self.map.layers['furniture_colisions'].objects) do
-            object.type = "furniture"
-            self.world:add(object, object.x, object.y, object.width, object.height)
-        end
-    end
-    
-    self.player = Player(160, 590, self.world)
-    self.owner:reset(100, 600)
-
-    self.throwable_objects = {}
-
-    if self.map.layers['throwable'] then
-        for _, spawn_point in ipairs(self.map.layers['throwable'].objects) do
-            table.insert(self.throwable_objects,
-            ThrowableObject(spawn_point.x, spawn_point.y, self.world))
-        end
-        
-    end
-
-    self.debug = false
+    self.owner:reset(100, 600, self.world)
 
     self.GameStateMachine:change_state("playing")
 

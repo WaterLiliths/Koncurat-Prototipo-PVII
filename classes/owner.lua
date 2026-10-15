@@ -135,9 +135,12 @@ function Owner:update (dt)
 
 end
 
-function Owner:reset(pos_x, pos_y)
+function Owner:reset(pos_x, pos_y, world)
+    self.world = world
     self.x = pos_x
     self.y = pos_y
+
+    self.world:add(self, self.hitbox_x, self.hitbox_y, self.width, self.height)
 
     self.annoyment = 0
     self.tenderness = 0
