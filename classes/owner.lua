@@ -1,6 +1,7 @@
 -- =========== MODULOS/CLASES REQUERIDAS ===============
 local Animation = require("classes.animations")
 local Class = require("libraries.class")
+local Signal = require("libraries.signal")
 
 -- =============== CLASE =====================
 
@@ -42,8 +43,18 @@ function Owner:init(pos_x, pos_y, world)
     self.annoyment = 0 --Barra de hartazgo
     self.tenderness = 0 --Barra de ternura
 
-    self.world:add(self, self.hitbox_x, self.hitbox_y, self.width, self.height)
+    -- SEÑALES
+    Signal.register("object_thrown", function ()
+        self:on_object_thrown()
+    end)
+    Signal.register("cute_interaction", function ()
+        self:on_cute_interaction()
+    end)
+    Signal.register("time_passed", function ()
+        self:on_time_passed()
+    end)
 
+    self.world:add(self, self.hitbox_x, self.hitbox_y, self.width, self.height)
 
 end
 
@@ -61,6 +72,8 @@ function Owner:change_annoyment(amount)
     if self.annoyment >= 100 then
         self.annoyment = 100
     end
+
+    Signal.emit("annoyment_changed", self.annoyment)
 end
 
 --- cambia la barra de ternura
@@ -76,6 +89,24 @@ function Owner:change_tenderness(amount)
         self.tenderness = 100
     end
 
+    Signal.emit("tenderness_changed", self.tenderness)
+end
+
+-- AL RECIBIR SEÑALES
+
+function Owner:on_object_thrown()
+    self:change_annoyment(15)
+    self:change_tenderness(-10)
+end
+
+function Owner:on_cute_interaction()
+    self:change_tenderness(10)
+    self:change_annoyment(-5)
+end
+
+function Owner:on_time_passed()
+    self:change_annoyment(-1)
+    self:change_tenderness(-1)
 end
 
 -- ============= ACTUALIZACION ============
@@ -102,6 +133,20 @@ function Owner:update (dt)
 
     self.animation:update(dt)
 
+end
+
+function Owner:reset(pos_x, pos_y, world)
+    self.world = world
+    self.x = pos_x
+    self.y = pos_y
+
+    self.world:add(self, self.hitbox_x, self.hitbox_y, self.width, self.height)
+
+    self.annoyment = 0
+    self.tenderness = 0
+
+    Signal.emit("annoyment_changed", self.annoyment)
+    Signal.emit("tenderness_changed", self.tenderness)
 end
 
 -- ============= DIBUJADO ============

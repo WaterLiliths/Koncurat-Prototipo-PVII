@@ -5,9 +5,12 @@ local Class = require("libraries.class")
 local Player = require("classes.player")
 local Owner = require("classes.owner")
 local ThrowableObject = require("classes.throwableobject")
+local HUD = require("classes.hud")
 local STI = require("libraries.sti")
 local Camera = require("libraries.camera")
 local Bump = require("libraries.bump")
+local Signal = require("libraries.signal")
+local Timer = require("libraries.timer")
 
 -- FSM requisitos
 local StateMachine = require("classes.states.stateMachine")
@@ -22,55 +25,58 @@ local Game = Class()
 
 -- ============ INICIALIZACION ==================
 
-function Game:init()  --Esta función y Game:restart() se refactorizarán luego para evtiar código duplicado
-
-    -- MAPA
-    self.map = STI("map/map_one.lua")
-
+function Game:create_game()
     -- MUNDO
     self.world = Bump.newWorld(32)
 
-    if self.map.layers['wall_colisions'] then
-        for _, object in ipairs(self.map.layers['wall_colisions'].objects) do
-            object.type = "wall"
-            self.world:add(object, object.x, object.y, object.width, object.height)
+    -- COLISIONES DEL MAPA
+    local colision_layers = {
+        wall_colisions = "wall",
+        doors_colisions = "door",
+        furniture_colisions = "furniture"
+    } 
+
+    for layer_name, object_type in pairs(colision_layers) do
+        local layer = self.map.layers[layer_name]
+        if layer then
+            for _, object in ipairs(layer.objects) do
+                object.type = object_type
+
+                self.world:add(object, object.x, object.y,
+            object.width, object.height)
+            end
         end
     end
 
-    if self.map.layers['doors_colisions'] then
-        for _, object in ipairs(self.map.layers['doors_colisions'].objects) do
-            object.type = "door"
-            self.world:add(object, object.x, object.y, object.width, object.height)
-        end
-    end
-
-    if self.map.layers['furniture_colisions'] then
-        for _, object in ipairs(self.map.layers['furniture_colisions'].objects) do
-            object.type = "furniture"
-            self.world:add(object, object.x, object.y, object.width, object.height)
-        end
-    end
-    
-    self.player = Player(160, 590, self.world)
-    self.owner = Owner(100, 600, self.world)
-
+    -- OBJETOS
     self.throwable_objects = {}
 
-    if self.map.layers['throwable'] then
-        for _, spawn_point in ipairs(self.map.layers['throwable'].objects) do
+    local throwable_layer = self.map.layers['throwable']
+
+    if throwable_layer then
+        for _, spawn_point in ipairs(throwable_layer.objects) do
             table.insert(self.throwable_objects,
             ThrowableObject(spawn_point.x, spawn_point.y, self.world))
         end
         
     end
-
-    self.title_font = love.graphics.newFont('assets/fonts/PixelGamer-Regular.otf', 60)
-    self.main_font_titles = love.graphics.newFont('assets/fonts/JAi_____.TTF', 20)
-    self.main_font = love.graphics.newFont('assets/fonts/JAi_____.TTF', 13)
-
-    self.debug = false
     
-   
+end
+
+function Game:init() 
+
+    -- MAPA
+    self.map = STI("map/map_one.lua")
+
+    self:create_game()
+
+    -- PLAYER
+    self.player = Player(160, 590, self.world)
+
+    -- DUEÑA
+    self.owner = Owner(100, 600, self.world)
+    self.owner_timer = Timer.new()
+
     -- CAMARA
     self.camera_center_x = SCREEN_WIDTH * 0.5
     self.camera_center_y = SCREEN_HEIGHT * 0.5
@@ -82,6 +88,11 @@ function Game:init()  --Esta función y Game:restart() se refactorizarán luego 
     self.annoyment_max = 60
     self.tenderness_max = 80
 
+    -- HUD
+    self.hud = HUD(self.tenderness_min, self.tenderness_max,
+        self.annoyment_min, self.annoyment_max)
+    
+    -- GAME STATE MACHINE
     self.GameStateMachine = StateMachine{
         ['main_menu'] = function () return GameMainMenu(self) end,
         ['playing'] = function () return GamePlaying(self) end,
@@ -107,6 +118,25 @@ function Game:check_collision(a, b)
     end
 end
 
+-- Para dibujar el modo debug
+function Game:get_collision_rectangles()
+    local rectangles = {}
+
+    for _, item in ipairs(self.world:getItems()) do
+        local x, y, width, height = self.world:getRect(item)
+
+        table.insert(rectangles, {
+            x = x,
+            y = y,
+            width = width,
+            height = height
+        })
+    end
+
+    return rectangles
+end
+
+
 function Game:interact()
 
     if not self.player.interaction_requested then
@@ -117,26 +147,24 @@ function Game:interact()
 
     for _, object in ipairs(self.throwable_objects) do
         if self:check_collision(self.player, object) then
-            object:throw()
-            self.player:set_interaction("throw")
-            self.owner:change_annoyment(15)
-            self.owner:change_tenderness(-10)
-
+            Signal.emit("object_thrown", object)
             interacted = true
             break
         end
     end
 
     if not interacted and self:check_collision(self.player, self.owner) then
-        self.player:set_interaction("cute")
-        self.owner:change_tenderness(10)
-        self.owner:change_annoyment(-5)
-        self.player.meow_sound:play()
-        
+        Signal.emit("cute_interaction")   
     end
 
     self.player.interaction_requested = false
 
+end
+
+function Game:unsubscribe_objects()
+    for _, object in ipairs(self.throwable_objects) do
+        object:unsubscribe()
+    end
 end
 
 function Game:remove_destroyed_objects()
@@ -150,12 +178,20 @@ end
 function Game:keypressed(key)
 
     if key == "f1" then
-        self.debug = not self.debug
+        Signal.emit("debug_mode")
     end
 
     self.GameStateMachine:keypressed(key)
 
     self.player:keypressed(key)
+end
+
+function Game:start_owner_timers()
+    self.owner_timer:clear()
+
+    self.owner_timer:every(2, function ()
+        Signal.emit("time_passed")
+    end)
 end
 
 function Game:check_win_condition()
@@ -190,42 +226,11 @@ end
 function Game:restart()
 
     self.world = Bump.newWorld(32)
+
+    self:create_game()
     
-    if self.map.layers['wall_colisions'] then
-        for _, object in ipairs(self.map.layers['wall_colisions'].objects) do
-            object.type = "wall"
-            self.world:add(object, object.x, object.y, object.width, object.height)
-        end
-    end
-
-    if self.map.layers['doors_colisions'] then
-        for _, object in ipairs(self.map.layers['doors_colisions'].objects) do
-            object.type = "door"
-            self.world:add(object, object.x, object.y, object.width, object.height)
-        end
-    end
-
-    if self.map.layers['furniture_colisions'] then
-        for _, object in ipairs(self.map.layers['furniture_colisions'].objects) do
-            object.type = "furniture"
-            self.world:add(object, object.x, object.y, object.width, object.height)
-        end
-    end
-    
-    self.player = Player(160, 590, self.world)
-    self.owner = Owner(100, 600, self.world)
-
-    self.throwable_objects = {}
-
-    if self.map.layers['throwable'] then
-        for _, spawn_point in ipairs(self.map.layers['throwable'].objects) do
-            table.insert(self.throwable_objects,
-            ThrowableObject(spawn_point.x, spawn_point.y, self.world))
-        end
-        
-    end
-
-    self.debug = false
+    self.player:reset(160, 590, self.world)
+    self.owner:reset(100, 600, self.world)
 
     self.GameStateMachine:change_state("playing")
 
@@ -238,50 +243,10 @@ function Game:draw ()
     self.GameStateMachine:render()
 end
 
---- Dibuja barras para la ui que actualizan el valor
-function Game:draw_bar(x, y, width, height, value, max_value, target_min, target_max)
-    
-    -- Fondo de la barra
-    love.graphics.setColor(0.3, 0.3, 0.3)
-    love.graphics.rectangle("fill", x, y, width, height)
-
-    -- Rango a alcanzar para ganar
-    local target_x = x + width * (target_min / max_value)
-    local target_width = width * ((target_max - target_min) / max_value)
-
-    love.graphics.setColor(0.7, 0.7, 0.7)
-    love.graphics.rectangle("fill", target_x, y, target_width, height)
-
-    -- Estado actual de la barra
-    local fill_width = width * (value / max_value)
-
-    love.graphics.setColor(1, 1, 1)
-
-    love.graphics.rectangle("fill", x, y, fill_width, height)
-
-    love.graphics.setColor(1, 1, 1) -- Vuelvo al blanco para no alterar el resto del dibujado
-
-
-end
-
 function Game:draw_ui()
 
     self.GameStateMachine:render_ui()
 
-end
-
-function Game:draw_debug()
-
-    if not self.debug then
-        return
-    end
-
-    local items = self.world:getItems()
-    for _, item in ipairs(items) do
-        local x, y, width, height = self.world:getRect(item)
-        love.graphics.rectangle("line", x, y, width, height)
-    end
-    
 end
 
 return Game

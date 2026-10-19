@@ -27,17 +27,7 @@ function GameMainMenu:render()
 end
 
 function GameMainMenu:render_ui()
-    love.graphics.setFont(self.game.title_font)
-    love.graphics.setColor(0.35, 0.65, 0.75)
-    love.graphics.printf("GORDIGATO", 0, 150, love.graphics.getWidth(), "center")
-
-    love.graphics.setFont(self.game.main_font_titles)
-    love.graphics.setColor(1.0, 1.0, 1.0)
-    love.graphics.printf("¡Consigue tu quinta ración de comida en la mañana!",
-    0, 250, love.graphics.getWidth(), "center")
-    love.graphics.printf("Presiona ENTER para comenzar",
-    0, 280, love.graphics.getWidth(), "center") 
-
+    self.game.hud:render_main_menu()
 end
 
 function GameMainMenu:exit()

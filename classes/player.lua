@@ -2,6 +2,7 @@
 local Animation = require("classes.animations")
 local Sound = require("classes.sound")
 local Class = require("libraries.class")
+local Signal = require("libraries.signal")
 local StateMachine = require("classes.states.stateMachine")
 local PlayerIdle = require("classes.states.playerIdle")
 local PlayerWalking = require("classes.states.playerWalking")
@@ -70,6 +71,13 @@ function Player:init(pos_x, pos_y, world)
     self.PlayerStateMachine:change_state('idle')
     self.world:add(self, self.hitbox_x, self.hitbox_y, self.width, self.height)
 
+    -- SEÑALES
+    Signal.register("object_thrown", function ()
+        self: on_object_thrown()
+    end)
+    Signal.register("cute_interaction", function ()
+        self: on_being_cute()
+    end)
 
 end
 
@@ -89,6 +97,33 @@ function Player:keypressed(key)
     if key == "e" then
         self:interact()
     end
+end
+
+function Player:reset(pos_x, pos_y, world)
+    self.world = world
+    self.x = pos_x
+    self.y = pos_y
+
+    self.hitbox_x = self.x - self.width
+    self.hitbox_y = self.y - self.height
+
+    -- Actualizo la posicion del personaje para que se corresponda con la del hitbox
+    self.x = self.hitbox_x + self.origin_x
+    self.y = self.hitbox_y + self.origin_y
+
+
+    self.world:add(self, self.hitbox_x, self.hitbox_y, self.width, self.height)
+
+    self.PlayerStateMachine:change_state('idle')    
+end
+-- ============== SEÑALES ==============
+function Player:on_object_thrown()
+    self:set_interaction("throw")
+end
+
+function Player:on_being_cute()
+    self:set_interaction("cute")
+    self.meow_sound:play()
 end
 
 -- ============== ACTUALIZACION ==============
