@@ -1,6 +1,7 @@
 -- =========== MODULOS/CLASES REQUERIDAS ===============
 local Sound = require("classes.sound")
 local Class = require("libraries.class")
+local Signal = require("libraries.signal")
 
 -- =============== CLASE =====================
 local ThrowableObject = Class() -- Lo creo como tabla local para protegerlo
@@ -30,6 +31,14 @@ function ThrowableObject:init(pos_x, pos_y, world)
     self.world = world
 
     self.world:add(self, self.hitbox_x, self.hitbox_y, self.width, self.height)
+    
+    self.on_object_thrown = function (thrown_object)
+        if thrown_object == self then
+            self:throw() 
+        end
+    end
+    
+    Signal.register("object_thrown", self.on_object_thrown)
 
 
 end
@@ -39,6 +48,10 @@ end
 function ThrowableObject:throw()
     self.is_destroyed = true
     self.break_sound:play()
+end
+
+function ThrowableObject:unsubscribe()
+    Signal.remove("object_thrown", self.on_object_thrown)
 end
 
 -- ============ DIBUJADO ==============

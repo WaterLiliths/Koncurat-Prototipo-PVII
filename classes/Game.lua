@@ -48,9 +48,6 @@ function Game:create_game()
         end
     end
 
-    -- PLAYER
-    self.player = Player(160, 590, self.world)
-
     -- OBJETOS
     self.throwable_objects = {}
 
@@ -73,6 +70,10 @@ function Game:init()
 
     self:create_game()
 
+    -- PLAYER
+    self.player = Player(160, 590, self.world)
+
+    -- DUEÑA
     self.owner = Owner(100, 600, self.world)
     self.owner_timer = Timer.new()
 
@@ -146,27 +147,24 @@ function Game:interact()
 
     for _, object in ipairs(self.throwable_objects) do
         if self:check_collision(self.player, object) then
-            object:throw()
-            self.player:set_interaction("throw")
-
-            Signal.emit("object_thrown")
-
+            Signal.emit("object_thrown", object)
             interacted = true
             break
         end
     end
 
     if not interacted and self:check_collision(self.player, self.owner) then
-        self.player:set_interaction("cute")
-
-        Signal.emit("cute_interaction")
-
-        self.player.meow_sound:play()
-        
+        Signal.emit("cute_interaction")   
     end
 
     self.player.interaction_requested = false
 
+end
+
+function Game:unsubscribe_objects()
+    for _, object in ipairs(self.throwable_objects) do
+        object:unsubscribe()
+    end
 end
 
 function Game:remove_destroyed_objects()
@@ -231,6 +229,7 @@ function Game:restart()
 
     self:create_game()
     
+    self.player:reset(160, 590, self.world)
     self.owner:reset(100, 600, self.world)
 
     self.GameStateMachine:change_state("playing")

@@ -92,6 +92,7 @@ end
 
 function GamePlaying:exit()
     self.game.owner_timer:clear()
+    self.game:unsubscribe_objects()
 end
 
 return GamePlaying
